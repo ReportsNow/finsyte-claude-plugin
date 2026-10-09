@@ -1,0 +1,19 @@
+{
+  "name": "finsyte",
+  "displayName": "Finsyte",
+  "version": "1.0.0",
+  "description": "Build and maintain live NetSuite financial reports and models in Excel with Finsyte: report templates, budget vs actual, department P&Ls, board summaries, and converting static sheets.",
+  "author": {
+    "name": "Finsyte.com LLC",
+    "url": "https://www.finsyte.com"
+  },
+  "homepage": "https://www.finsyte.com/features/claude-skill",
+  "repository": "https://github.com/ReportsNow/finsyte-claude-plugin",
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": ["finsyte", "netsuite", "excel", "financial-reporting", "financial-statements", "suiteql", "fsn"],
+  "icon": "./icon.png",
+  "documentationUrl": "https://www.finsyte.com/docs/add-in/docs/getting-started",
+  "supportUrl": "https://www.finsyte.com/contact",
+  "privacyPolicyUrl": "https://www.finsyte.com/privacy-policy",
+  "termsOfServiceUrl": "https://www.finsyte.com/terms-and-conditions"
+}

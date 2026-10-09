@@ -1,0 +1,5 @@
+# OS files the Anthropic directory's validator rejects
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
