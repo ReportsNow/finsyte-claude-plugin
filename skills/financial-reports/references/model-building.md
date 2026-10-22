@@ -17,7 +17,7 @@ Read this when building a model rather than a single standard statement: a workb
 
 To make a whole workbook recompute from one place, drive every sheet from one inputs tab rather than setting parameters statement by statement.
 
-1. **Create a Drivers sheet** as the first tab. Put the shared inputs in labeled cells: Subsidiary, Current Fiscal Year, Prior Fiscal Year, Period, Period Range, Budget Category, and Book if it isn't the primary book. Give the input cells Finsyte dropdowns (*Dropdowns* below).
+1. **Create a Drivers sheet** as the first tab. Put the shared inputs in labeled cells: Subsidiary, Current Fiscal Year, Prior Fiscal Year, Period, Period Range, Budget Category, and Book if it isn't the primary book. Give the input cells Finsyte dropdowns (*Dropdowns* below). Inputs are typed values or relative periods; never derive one from `TODAY`, `OFFSET`, `INDIRECT`, or `CELL` (SKILL.md, *Inputs are never volatile*).
 2. **Name the inputs** (`CurrentFY`, `PriorFY`, `Subsidiary`) so formulas read clearly. Derive year labels from the input, for example `=VALUE(RIGHT(TRIM(CurrentFY),4))` for the year as a number, then `="FY "&(year-1)` for the prior year.
 3. **Point every sheet's parameter cells at the Drivers cells.** Template parameter cells can be Text-formatted (the Period cell is, on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow); set each to General before entering the reference, or it stores the formula as text and its dependents return `#VALUE!`.
 4. **Drive every label from the inputs too.** Titles, subtitles, column headers, chart titles, and axis labels are easy to hard-code and forget:

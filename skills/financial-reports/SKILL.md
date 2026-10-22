@@ -119,6 +119,19 @@ Type the values as plain text without quote marks: `FY 2026`, `FSN_L0_INC`, `Hea
 
 **Always fill in Subsidiary.** A blank Subsidiary means the signed-in user's default subsidiary, not all subsidiaries, so the same workbook would show different numbers to different people.
 
+### Inputs are never volatile
+
+Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous: two or more calls that depend on a volatile cell restart each other after every result, so Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
+
+| Instead of | Use |
+|---|---|
+| `YEAR(TODAY())`, `MONTH(TODAY())`, `EOMONTH(TODAY(),-1)`, or `FSN.DateToPeriod(TODAY(), …)` for the current or last period | `<Current>` or `<Current - 1>` typed in the Period cell; it sets the fiscal year too |
+| The subsidiary from the tab name with `CELL("filename")` | The subsidiary typed in the tab's own Subsidiary cell, with a Subsidiary dropdown |
+| `INDIRECT` to read a sheet or cell by name | A direct reference, or `INDEX` or `CHOOSE` over the possible cells |
+| `OFFSET` for a moving range | `INDEX`, or one column per `<Current - n>` period |
+
+When a workbook you change or convert already has a volatile input that Finsyte calls would read, such as a Drivers cell with `=YEAR(TODAY())`, replace it as above before you point Finsyte calls at it, and tell the user which cells you changed and why.
+
 ### One Finsyte call per cell, with nothing around it but a minus
 
 Write one `FSN.` call per cell. Never nest it in another `FSN.` call or wrap it in `IF`, `IFERROR`, `SUM`, or any other function. A leading `-` for sign is the one exception; it's what Finsyte's Switch Sign writes. Finsyte caches each call, and the right-click menu (Drill Down, Switch Sign, Go to Budget) only works on an unwrapped call. Put `IF` or `IFERROR` in a separate cell that references the call.
@@ -263,6 +276,7 @@ Run these before handing over any report or model. Each one is pass or fail.
 3. **Nothing made up.** No `#NAME?` (such as `BudgetAccountNetIncome`), no `Invalid account number`, no invented `FSN_` codes.
 4. **Signs are right.** Credit-normal actuals negated once; budgets and CTA never negated; template rows not negated a second time.
 5. **Formulas you wrote follow the conventions.** No literals inside calls, Subsidiary filled in, one call per cell with nothing around it but `-`, totals as `AGGREGATE(9,0,…)`, and no line item written as an `AGGREGATE`. Finsyte's own template formulas are exempt.
-6. **The report is complete.** The missing-accounts check is present and clean on every report that lists accounts.
-7. **It re-points from one place.** Changing an input and refreshing updates every number, label, and title, and no `FY 20xx` or subsidiary name is typed anywhere but the input cells.
-8. **A converted sheet ties** to its original (`references/converting.md`).
+6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, or a `SUMIF` with ranges of different sizes.
+7. **The report is complete.** The missing-accounts check is present and clean on every report that lists accounts.
+8. **It re-points from one place.** Changing an input and refreshing updates every number, label, and title, and no `FY 20xx` or subsidiary name is typed anywhere but the input cells.
+9. **A converted sheet ties** to its original (`references/converting.md`).
