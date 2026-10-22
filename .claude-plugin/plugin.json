@@ -1,7 +1,7 @@
 {
   "name": "finsyte",
   "displayName": "Finsyte",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build and maintain live NetSuite financial reports and models in Excel with Finsyte: report templates, budget vs actual, department P&Ls, board summaries, and converting static sheets.",
   "author": {
     "name": "Finsyte.com LLC",
