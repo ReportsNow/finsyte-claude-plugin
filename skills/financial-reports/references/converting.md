@@ -27,7 +27,7 @@ Identify, without editing:
 
 ## 3. Build the parameter block
 
-Add labeled parameter cells above the report or in a small Params area: Subsidiary, Fiscal Year (`FY 2026` format), Period (a number), Period Range, and Book if it isn't the primary book. When each column means something different, add a helper row above the column headers that holds that column's parameter: its period, subsidiary, or segment value.
+Add labeled parameter cells above the report or in a small Params area: Subsidiary, Fiscal Year (`FY 2026` format), Period (a number), Period Range, and Book if it isn't the primary book. If the workbook already has input cells you'll reuse, check them first: one built on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, or `CELL` gets replaced as in SKILL.md, *Inputs are never volatile*. When each column means something different, add a helper row above the column headers that holds that column's parameter: its period, subsidiary, or segment value.
 
 Choose the Period Range from the report type: a balance sheet is `YTD`, which acts as inception to date for balance sheet accounts; an income statement matches the header's span, `PTD` for one month, `QTD` for a quarter, or `YTD`. If the fiscal calendar isn't clear from the header, state the Fiscal Year and Period you inferred and let the user correct it rather than asking an open question.
 
