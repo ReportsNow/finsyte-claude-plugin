@@ -8,7 +8,7 @@ A health check reads a whole workbook and reports what makes the workbook slow t
 2. **Every fix needs a yes to the listed edits.** List each edit with the cell, the old formula and the new formula, then wait. A request such as "fix all of it" asks for that list. The user's yes to the list starts the edits.
 3. **Keep the old formulas.** Before an edit, record the old formula of every cell the edit touches, and restore the old formulas at the user's request. Excel's Undo does not always cover edits made by an add-in.
 4. **Re-read before you edit.** The workbook can change after the check.
-5. **Tie out every fix.** Record the values of the affected FSN cells before the edit, wait for `#GETTING_DATA` to clear, and compare. Report every difference. Cells that showed an error before the fix are expected to change.
+5. **Tie out every fix.** Before the edit, record the values of the cells the fix changes and of the FSN cells that read them. After the edit, wait for `#GETTING_DATA` to clear, and compare. Report every difference. Cells that showed an error before the fix are expected to change. Under Manual calculation the values are stale: ask the user to press F9 before you record the values and again after the edit.
 6. **Hidden sheets stay hidden.** Report cells on hidden sheets with the sheet name. Unhide a sheet, or delete a sheet, name or style, only at the user's request. Finsyte's own `FinsyteNS.` sheets and names stay as they are (see "Checks").
 7. **A workbook file gets a report only.** Without Excel, you read the file and report. You return no rewritten file: saving a workbook with a library such as openpyxl can drop charts, pivot tables, spill formulas and other parts, and nothing recalculates the FSN formulas. Give the user the steps to make in Excel.
 
@@ -71,7 +71,7 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 
 | Rule ID | What the rule flags | Severity | Fix mode |
 |---|---|---|---|
-| `VOLATILE_FUNCTION` | `NOW`, `TODAY`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, and `SUMIF` with a sum range of a different size from its range, in cells, conditional formatting and names | Info; Medium above 100 cells | Confirm |
+| `VOLATILE_FUNCTION` | `NOW`, `TODAY`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, and `SUMIF` with a sum range of a different size from its range, in cells, conditional formatting and names. Cells already in an `FSN_VOLATILE_INPUT` finding are left out. | Info; Medium above 100 cells | Confirm for `INDIRECT`, `OFFSET` and the `SUMIF` size mismatch; Advise for `TODAY`, `NOW`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `CELL` and `INFO` |
 | `WHOLE_COLUMN_REFERENCE` | References such as `A:A` and `1:1`. `SUMPRODUCT`, array formulas, spilling formulas and FSN calls process every cell of the column, about a million rows. `SUM`, `SUMIF` and similar functions stop at the last used row. | Medium inside `SUMPRODUCT`, array formulas, spilling formulas and FSN calls; Info elsewhere | Confirm for Medium; Advise for Info, with no change, because whole columns in `SUM` and `SUMIF` cost little |
 | `ITERATIVE_CALCULATION` | Iterative calculation turned on, which hides circular references | Medium | Advise: turn iterative calculation off first (File, Options, Formulas), then Formulas, Error Checking, Circular References lists the circular references |
 | `ERROR_CELL` | Other error cells, by error type and sheet | Medium | Advise |
@@ -84,7 +84,7 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 | `CONDITIONAL_FORMATTING` | More than 100 conditional formatting rules on one sheet | Medium; High above 1,000 | Advise |
 | `CELL_STYLES` | More than 1,000 custom cell styles | Medium; High above 10,000 | Advise: Review, Check Performance |
 | `NAMES_BROKEN` | Defined names that refer to `#REF!` | Medium | Confirm |
-| `EXTERNAL_LINKS` | Formulas and names that refer to other workbooks, such as `[Budget.xlsx]Sheet1!A1` | Medium | Advise: Data, Edit Links |
+| `EXTERNAL_LINKS` | Formulas and names that refer to other workbooks: `[Budget.xlsx]Sheet1!A1` in an open workbook. A workbook file stores the same link as an index, such as `[1]Sheet1!A1`, with the path in `xl/externalLinks`. | Medium | Advise: Data, Workbook Links in Microsoft 365 (Data, Edit Links in older Excel) |
 | `NAMES_HIDDEN` | Hidden defined names, apart from Finsyte's own `FinsyteNS.` names | Info | Advise |
 | `NAMES_MANY` | More than 1,000 defined names | Info | Advise |
 | `SHAPES` | More than 500 shapes on one sheet, or hidden or zero-size shapes | Medium for the count; Info for hidden or zero-size | Advise |
@@ -119,8 +119,8 @@ Custom segments are the last arguments of 15 FSN functions: one argument per cus
 | Hidden: `GLAccountNetIncome` | 13 |
 | Hidden: `GLAccountRetainedEarnings` | 12 |
 
-1. For each FSN formula that shows `#VALUE!`, count the arguments from the start position to the end, empty ones included.
-2. Ask the user for the Segments Used count in Help, Preferences, Custom Segments before you name the cause.
+1. For each FSN formula that shows `#VALUE!`, count the arguments from the start position to the end, empty ones included. A formula with no argument at or past the start position passes no segment arguments, so its cause is something else (see SKILL.md, "Gotchas").
+2. For the formulas that pass segment arguments, ask the user for the Segments Used count in Help, Preferences, Custom Segments before you name the cause.
 3. Formulas that pass more segment arguments than that count are the cause: `FSN_SEGMENT_ARGUMENTS`.
 4. Trailing empty segment arguments filter nothing, so removing them keeps every result. List the edit with the old and new formula, and remove the arguments after the user's yes.
 5. Segment arguments with values get advice: the segments are not set up on this computer. The user or an administrator sets them up in Help, Preferences, Custom Segments, then restarts Excel. For a workbook of another company, the Company Mismatch dialog at open leads to Use for Custom Features.
@@ -148,14 +148,16 @@ Info
 I changed nothing. I can step through the flagged cells one at a time, and I can make the Confirm fixes after you say yes to the edits I list.
 ```
 
-For a workbook file, the last line is: "I changed nothing and I am not returning a file. To make the fixes, open the workbook in Excel with Finsyte and follow the steps above."
+For a workbook file, every Fix line uses the second form, "You make this fix in Excel: <steps>.", and the last line is: "I changed nothing and I am not returning a file. To make the fixes, open the workbook in Excel with Finsyte and follow the steps above."
+
+Stepping through the flagged cells skips cells on hidden sheets, because Excel cannot select a cell on a hidden sheet. Name the hidden sheet and its cells instead, and leave the sheet hidden.
 
 ## Fixes
 
 | Rule ID | Fix |
 |---|---|
 | `FSN_VOLATILE_INPUT` | The SKILL.md replacement table, "Inputs are never volatile" |
-| `VOLATILE_FUNCTION` | A direct reference, `INDEX` or `CHOOSE` in place of `INDIRECT`; `INDEX` in place of `OFFSET` |
+| `VOLATILE_FUNCTION` | A direct reference, `INDEX` or `CHOOSE` in place of `INDIRECT`; `INDEX` in place of `OFFSET`; a sum range the same size as the range in the `SUMIF`. `TODAY` or `NOW` in a title or an "as of" date, `RAND` in a model, `CELL` and `INFO` get advice only: each one does what the user built it to do, and the cost is a recalculation at every change. |
 | `WHOLE_COLUMN_REFERENCE` | A range that grows with the data: a table column, a spill reference such as `A2#`, or `A2:INDEX(A:A,COUNTA(A:A))`. A fixed range such as `$A$1:$A$2000` drops rows added later. For an FSN account list, use the account range from SKILL.md, "Keep reports complete". The listed edit names the rows the new range covers. Compare the result before and after. |
 | `NAMES_BROKEN` | Delete each name after confirming no formula, name, conditional format or data validation uses the name |
 | `FSN_ERROR_MESSAGE`, `FSN_ERROR_VALUE` | The causes in SKILL.md, "Gotchas" |
