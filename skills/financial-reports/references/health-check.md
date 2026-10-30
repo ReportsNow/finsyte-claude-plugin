@@ -97,9 +97,9 @@ Check Performance (Review tab) is in Excel for Microsoft 365. For other Excel ve
 ## Volatile inputs
 
 1. Find the volatile cells: formulas that call a function in the `VOLATILE_FUNCTION` row, plus `FSN.LastDataRefresh` and `FSN.Slicer`. Check names and conditional formatting too.
-2. Collect the distinct cells and names that FSN calls reference. A report with 5,000 FSN calls usually reads a handful of input cells.
-3. Trace each input once. Open workbook: `getPrecedents()` on the input cell returns every cell upstream, on any sheet. Workbook file: follow the references of the input's formula level by level, through cells and names. A name's own formula is checked directly.
-4. An input that is volatile, or that has a volatile precedent, flags every FSN formula that reads the input: one `FSN_VOLATILE_INPUT` finding per input, with the count of FSN formulas.
+2. Collect the distinct cells and names that FSN calls reference, and read their formulas. A typed input has no precedents and needs no trace: 5,000 typed account cells cost one read and no trace.
+3. Trace each input that holds a formula, once. Open workbook: `getPrecedents()` on that input cell returns every cell upstream, on any sheet. Workbook file: follow the references of the input's formula level by level, through cells and names. A name's own formula is checked directly.
+4. An input that is volatile, or that has a volatile precedent, flags every FSN formula that reads the input. Give one `FSN_VOLATILE_INPUT` finding per input cell, or per block of input cells with the same formula, such as `A5:A40`, with the count of FSN formulas.
 
 The fix is the replacement table in SKILL.md, "Inputs are never volatile": `<Current>` or `<Current - 1>` in the period cell, a typed subsidiary, and a direct reference, `INDEX` or `CHOOSE` in place of `INDIRECT` and `OFFSET`.
 
