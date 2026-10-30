@@ -9,7 +9,7 @@ A health check reads a whole workbook and reports what makes the workbook slow t
 3. **Keep the old formulas.** Before an edit, record the old formula of every cell the edit touches, and restore the old formulas at the user's request. Excel's Undo does not always cover edits made by an add-in.
 4. **Re-read before you edit.** The workbook can change after the check.
 5. **Tie out every fix.** Record the values of the affected FSN cells before the edit, wait for `#GETTING_DATA` to clear, and compare. Report every difference. Cells that showed an error before the fix are expected to change.
-6. **Hidden sheets stay hidden.** Report cells on hidden sheets with the sheet name. Unhide a sheet, or delete a sheet, name or style, only at the user's request.
+6. **Hidden sheets stay hidden.** Report cells on hidden sheets with the sheet name. Unhide a sheet, or delete a sheet, name or style, only at the user's request. Finsyte's own `FinsyteNS.` sheets and names stay as they are (see "Checks").
 7. **A workbook file gets a report only.** Without Excel, you read the file and report. You return no rewritten file: saving a workbook with a library such as openpyxl can drop charts, pivot tables, spill formulas and other parts, and nothing recalculates the FSN formulas. Give the user the steps to make in Excel.
 
 | Thought | Reality |
@@ -20,11 +20,11 @@ A health check reads a whole workbook and reports what makes the workbook slow t
 | "I'll clear the formatting past the data myself." | Excel's Check Performance does that cleanup, and Undo works there. Point the user to it. |
 | "The skill says nothing about returning a fixed file." | Rule 7: a workbook file gets a report only. |
 
-Red flags that mean stop and list the edits: "no confirmation round", "a temporary sheet", "I fixed what I could", a file name ending in `_fixed`.
+Stop and list the edits at any of these words in your own plan: "no confirmation round", "a temporary sheet", "I fixed what I could", a file name ending in `_fixed`.
 
 ## Read the workbook
 
-**Finsyte loaded and settled.** Read the values of the FSN cells first. `#NAME?` in every FSN cell means Finsyte is not loaded: say so and skip the FSN checks. Cells that show `#GETTING_DATA` get a second read after about a minute. Cells still loading at the second read go in the report as `FSN_GETTING_DATA`.
+**Finsyte loaded and settled.** Read the values of the FSN cells first. `#NAME?` in every FSN cell means Finsyte was not loaded at the last calculation, as in a file saved on a computer without Finsyte. Say so, skip the rules that read FSN values (`FSN_ERROR_NAME`, `FSN_ERROR_VALUE`, `FSN_ERROR_MESSAGE`, `FSN_GETTING_DATA`, `FSN_SEGMENT_ARGUMENTS`), and run every rule that reads formulas, `FSN_VOLATILE_INPUT` included. Cells that show `#GETTING_DATA` get a second read after about a minute. Cells still loading at the second read go in the report as `FSN_GETTING_DATA`.
 
 **Open workbook (Office.js).**
 
@@ -72,8 +72,8 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 | Rule ID | What the rule flags | Severity | Fix mode |
 |---|---|---|---|
 | `VOLATILE_FUNCTION` | `NOW`, `TODAY`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, and `SUMIF` with a sum range of a different size from its range, in cells, conditional formatting and names | Info; Medium above 100 cells | Confirm |
-| `WHOLE_COLUMN_REFERENCE` | References such as `A:A` and `1:1`. `SUMPRODUCT`, array formulas, spilling formulas and FSN calls process every cell of the column, about a million rows. `SUM`, `SUMIF` and similar functions stop at the last used row. | Medium inside `SUMPRODUCT`, array formulas, spilling formulas and FSN calls; Info elsewhere | Confirm |
-| `ITERATIVE_CALCULATION` | Iterative calculation turned on, which hides circular references | Medium | Advise: Formulas, Error Checking, Circular References lists the circular references |
+| `WHOLE_COLUMN_REFERENCE` | References such as `A:A` and `1:1`. `SUMPRODUCT`, array formulas, spilling formulas and FSN calls process every cell of the column, about a million rows. `SUM`, `SUMIF` and similar functions stop at the last used row. | Medium inside `SUMPRODUCT`, array formulas, spilling formulas and FSN calls; Info elsewhere | Confirm for Medium; Advise for Info, with no change, because whole columns in `SUM` and `SUMIF` cost little |
+| `ITERATIVE_CALCULATION` | Iterative calculation turned on, which hides circular references | Medium | Advise: turn iterative calculation off first (File, Options, Formulas), then Formulas, Error Checking, Circular References lists the circular references |
 | `ERROR_CELL` | Other error cells, by error type and sheet | Medium | Advise |
 
 **Workbook structure and settings**
@@ -85,20 +85,22 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 | `CELL_STYLES` | More than 1,000 custom cell styles | Medium; High above 10,000 | Advise: Review, Check Performance |
 | `NAMES_BROKEN` | Defined names that refer to `#REF!` | Medium | Confirm |
 | `EXTERNAL_LINKS` | Formulas and names that refer to other workbooks, such as `[Budget.xlsx]Sheet1!A1` | Medium | Advise: Data, Edit Links |
-| `NAMES_HIDDEN` | Hidden defined names | Info | Advise |
+| `NAMES_HIDDEN` | Hidden defined names, apart from Finsyte's own `FinsyteNS.` names | Info | Advise |
 | `NAMES_MANY` | More than 1,000 defined names | Info | Advise |
 | `SHAPES` | More than 500 shapes on one sheet, or hidden or zero-size shapes | Medium for the count; Info for hidden or zero-size | Advise |
 | `PRECISION_AS_DISPLAYED` | Precision as displayed turned on, which permanently rounds stored values | High | Advise |
 | `CALCULATION_MANUAL` | Calculation set to Manual. FSN values may be stale until the next calculation. | Info | Advise |
-| `HIDDEN_SHEETS` | Hidden and very hidden sheets | Info | Advise |
+| `HIDDEN_SHEETS` | Hidden and very hidden sheets, apart from Finsyte's own `FinsyteNS.` sheets | Info | Advise |
 
 Check Performance (Review tab) is in Excel for Microsoft 365. For other Excel versions, Ctrl+End shows the last used cell, and the user clears the formatting past the data by hand.
 
+**Finsyte's own items.** Sheets and names that start with `FinsyteNS.` hold the lists behind Finsyte dropdowns and templates, and Finsyte keeps them hidden. Report them in one Info line as Finsyte's own and expected. Never list them for deletion or unhiding: deleting them breaks the dropdowns. A user who asks to remove them gets that reason.
+
 ## Volatile inputs
 
-1. Find the volatile cells: formulas that call a function in the `VOLATILE_FUNCTION` row, plus `FSN.LastDataRefresh` and `FSN.Slicer`. Check names and conditional formatting too.
-2. Collect the distinct cells and names that FSN calls reference, and read their formulas. A typed input has no precedents and needs no trace: 5,000 typed account cells cost one read and no trace.
-3. Trace each input that holds a formula, once. Open workbook: `getPrecedents()` on that input cell returns every cell upstream, on any sheet. Workbook file: follow the references of the input's formula level by level, through cells and names. A name's own formula is checked directly.
+1. Find the volatile cells and names: formulas that call a function in the `VOLATILE_FUNCTION` row, plus `FSN.LastDataRefresh` and `FSN.Slicer`. Check conditional formatting too. An FSN formula that calls a volatile function inside its own arguments, such as `MONTH(TODAY())` as the period, is an `FSN_VOLATILE_INPUT` finding by itself.
+2. Collect the distinct cells and names that FSN calls reference, and read their formulas. A typed input has no precedents and needs no trace, so 5,000 typed account cells need one read and no trace.
+3. Trace each input that holds a formula, once. Open workbook: read the input's formula first, then call `getPrecedents()` only on an input whose formula references other cells, one input per sync. `getPrecedents()` returns every cell upstream, on any sheet, and throws ItemNotFound for a formula without cell references: treat that error as no precedents. Workbook file: follow the references of the input's formula level by level. In both cases, expand every name in an input or precedent formula and check the name's formula, because precedents are cells only.
 4. An input that is volatile, or that has a volatile precedent, flags every FSN formula that reads the input. Give one `FSN_VOLATILE_INPUT` finding per input cell, or per block of input cells with the same formula, such as `A5:A40`, with the count of FSN formulas.
 
 The fix is the replacement table in SKILL.md, "Inputs are never volatile": `<Current>` or `<Current - 1>` in the period cell, a typed subsidiary, and a direct reference, `INDEX` or `CHOOSE` in place of `INDIRECT` and `OFFSET`.
@@ -154,7 +156,7 @@ For a workbook file, the last line is: "I changed nothing and I am not returning
 |---|---|
 | `FSN_VOLATILE_INPUT` | The SKILL.md replacement table, "Inputs are never volatile" |
 | `VOLATILE_FUNCTION` | A direct reference, `INDEX` or `CHOOSE` in place of `INDIRECT`; `INDEX` in place of `OFFSET` |
-| `WHOLE_COLUMN_REFERENCE` | A range that covers the data, such as `Data!$A$1:$A$2000`, or a table column. Compare the result before and after. |
+| `WHOLE_COLUMN_REFERENCE` | A range that grows with the data: a table column, a spill reference such as `A2#`, or `A2:INDEX(A:A,COUNTA(A:A))`. A fixed range such as `$A$1:$A$2000` drops rows added later. For an FSN account list, use the account range from SKILL.md, "Keep reports complete". The listed edit names the rows the new range covers. Compare the result before and after. |
 | `NAMES_BROKEN` | Delete each name after confirming no formula, name, conditional format or data validation uses the name |
 | `FSN_ERROR_MESSAGE`, `FSN_ERROR_VALUE` | The causes in SKILL.md, "Gotchas" |
 | `FSN_SEGMENT_ARGUMENTS` | Trailing empty arguments removed (see "Custom segment arguments") |
