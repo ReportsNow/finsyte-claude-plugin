@@ -14,6 +14,7 @@ Claude uses the skill on its own whenever a request involves Finsyte, FSN formul
 - Laying out rows and columns from NetSuite lists, so new departments, subsidiaries, and accounts show up on refresh
 - Replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas, then tying every converted cell back to the original
 - Diagnosing `#VALUE!`, `#NAME?`, `Invalid account number`, `#GETTING_DATA`, `#SPILL!`, and sign errors in FSN formulas
+- Running a health check on a workbook: volatile inputs, whole-column references, error cells, and other things that make a workbook slow or wrong, with fixes made only after you confirm them
 - Adding a check that flags GL accounts created in NetSuite after a report was built, so totals don't go stale silently
 
 ## Requirements
@@ -30,10 +31,11 @@ Claude writes the formulas. The Finsyte add-in evaluates them in Excel, against 
 3. "Build a one-page board summary with revenue, gross margin, operating expenses, and net income for this quarter, compared with budget and with the same quarter last year."
 4. "I exported our December 2025 balance sheet from NetSuite into this workbook. Convert it to live Finsyte formulas and show me any rows that don't tie to the original."
 5. "Every FSN.GLAccountBalance cell on my P&L shows #VALUE! since I pointed its parameter cells at a Drivers sheet. What's wrong?"
+6. "Run a health check on this workbook. It takes a minute to recalculate and I don't know why."
 
 ## What this plugin does and doesn't do
 
-This plugin contains instructions and reference material only: Markdown files that Claude reads. It contains no executable code or scripts, makes no network requests, and does not collect, store, or send any data. When Claude works in your workbook it writes Excel formulas, which the Finsyte add-in evaluates. The plugin covers reporting with Finsyte's functions and does not create, change, or delete records in NetSuite.
+This plugin contains instructions and reference material only: Markdown files that Claude reads. It contains no executable code or scripts, makes no network requests, and does not collect, store, or send any data. When Claude works in your workbook it writes Excel formulas, which the Finsyte add-in evaluates. A health check reads the formulas, values, and settings of the whole workbook and changes nothing until you confirm a fix. The plugin covers reporting with Finsyte's functions and does not create, change, or delete records in NetSuite.
 
 All NetSuite access happens in the Finsyte add-in on your computer, under your NetSuite login and role. How Finsyte handles your data is described in the [Finsyte privacy policy](https://www.finsyte.com/privacy-policy).
 
