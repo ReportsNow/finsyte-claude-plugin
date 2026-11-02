@@ -10,6 +10,8 @@
 | Sheets | `worksheet.visibility`, `worksheet.protection.protected` |
 | Formula cells, per sheet | `getUsedRange().getSpecialCellsOrNullObject("Formulas")`, then `formulas`, `values`, `valueTypes` and `numberFormat` for each area |
 | Array and spilling formulas | `savedAsArray` and `hasSpill` on the formula cells |
+| Data tables | Formula cells whose formula text holds `TABLE(`. Office.js has no data table object. |
+| Constant cells, per sheet | `getUsedRange().getSpecialCellsOrNullObject("Constants")`, then `values` and `valueTypes`, for `NUMBERS_AS_TEXT` and `FSN_HARDCODED_VALUE` |
 | FSN inputs | `formulas`, `values`, `valueTypes` and `numberFormat` of each input cell, and `getSpillParentOrNullObject()` on an input with no formula of its own |
 | Spill size | `getSpillingToRangeOrNullObject()` on each cell with a table FSN function. A cell that does not spill returns a null object. |
 | Used range against data | `getUsedRange()` and `getUsedRange(true)`, which counts values only |

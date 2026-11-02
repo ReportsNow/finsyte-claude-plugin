@@ -2,9 +2,9 @@
 
 **Formats.** openpyxl reads .xlsx, .xlsm, .xltx and .xltm files. For a .xlsb or .xls file, ask the user to save a copy as .xlsx (File › Save As › Excel Workbook) or to run the check in Excel with Finsyte loaded, and report nothing you could not read.
 
-**Cells.** Load the file twice with `read_only=True`: once for formulas, once with `data_only=True` for the values saved at the last save. openpyxl needs about 50 times the file size in memory, and read-only mode keeps that down. A formula cell can hold an `ArrayFormula` object (read its `text` and its `ref`) or a `DataTableFormula` object in place of a string. Remove the `_xlfn.` and `_xlws.` prefixes before you match function names.
+**Cells.** Load the file twice with `read_only=True`: once for formulas, once with `data_only=True` for the values saved at the last save. openpyxl needs about 50 times the file size in memory, and read-only mode keeps that down. A formula cell can hold an `ArrayFormula` object (read its `text` and its `ref`) or a `DataTableFormula` object in place of a string. Remove the `_xll.`, `_xlfn.` and `_xlws.` prefixes before you match function names: the file stores every FSN call as `_xll.FSN.…`.
 
-**Settings.** The `calcPr` element of `xl/workbook.xml` (`wb.calculation` in openpyxl). An absent attribute takes its default: calculation automatic, iteration off, full precision on. True is written `1` or `true`.
+**Settings.** Read the `calcPr` element of `xl/workbook.xml` from the XML. openpyxl's `wb.calculation` fills in defaults of its own, such as `fullCalcOnLoad` set to true, so its values do not show what the file holds. An absent attribute takes Excel's default: calculation automatic, iteration off, full precision on. True is written `1` or `true`.
 
 | Attribute | Meaning |
 |---|---|
@@ -13,14 +13,14 @@
 | `iterate="1"` | `ITERATIVE_CALCULATION` |
 | `fullPrecision="0"` | `PRECISION_AS_DISPLAYED` |
 | `forceFullCalc="1"` | `FORCE_FULL_CALCULATION` |
-| `concurrentCalc="0"`, `fullCalcOnLoad="1"`, a `calcId` of another Excel version | `FORCE_FULL_CALCULATION`, Info items |
+| `concurrentCalc="0"`, `fullCalcOnLoad="1"` | `FORCE_FULL_CALCULATION`, Info items |
 
 **Parts that openpyxl drops or skips.** Read these from the zip:
 
 | Item | Where |
 |---|---|
 | Shapes | `xl/drawings/drawingN.xml`, the drawing named in the sheet's relationships: count the anchors. `hidden="1"` on `xdr:cNvPr` marks a hidden shape, and `a:ext cx="0" cy="0"` a zero-size shape. |
-| Conditional formatting | `ws.conditional_formatting`, plus the `x14:conditionalFormatting` elements in the sheet XML. openpyxl warns "Conditional Formatting extension is not supported and will be removed" for those. |
+| Conditional formatting | The `conditionalFormatting` and `x14:conditionalFormatting` elements of the sheet XML. A read-only worksheet has no `conditional_formatting`, and openpyxl drops the `x14` rules with the warning "Conditional Formatting extension is not supported and will be removed". |
 | Unique cell formats | `cellXfs count` in `xl/styles.xml`. Named styles are in `cellStyles`. |
 | External links | Every part in `xl/externalLinks`, including links that no formula uses. A formula stores a link as an index, such as `[1]Sheet1!A1`; the index follows the order of `externalReferences` in `xl/workbook.xml`, and the part's relationship holds the path. |
 | PivotTables and connections | `refreshOnLoad` in `xl/pivotCache/pivotCacheDefinitionN.xml` and in `xl/connections.xml` |

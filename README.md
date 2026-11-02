@@ -5,9 +5,9 @@
 This plugin adds two skills.
 
 - **financial-reports** teaches Claude how Finsyte works so it can help you build new reports and models and change the ones you have. Claude starts from Finsyte's report templates, pulls any account, account type, or rollup with the right parameters, lays reports out by NetSuite account type the way NetSuite does, and keeps signs, totals, and segment arguments right. The result is a workbook that ties out to NetSuite and re-points to a new period or subsidiary by changing one cell.
-- **workbook-health-check** reads a whole Finsyte workbook and reports what makes it slow to calculate, open, or save, and what can give wrong numbers. It changes nothing until you confirm the exact edits for a fix, and it uses the financial-reports skill for how Finsyte works.
+- **workbook-health-check** reads a whole Finsyte workbook and reports what makes the workbook slow to calculate, open, or save, and what can give wrong numbers. The health check changes nothing until you confirm the exact edits for a fix, and the health check uses the financial-reports skill for how Finsyte works.
 
-Claude uses the skills on its own whenever a request involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call them directly with `/finsyte:financial-reports` and `/finsyte:workbook-health-check`.
+Claude uses the skills on its own for any request that involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call them directly with `/finsyte:financial-reports` and `/finsyte:workbook-health-check`.
 
 ## What it helps with
 

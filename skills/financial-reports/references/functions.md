@@ -314,7 +314,7 @@ These still calculate. All but `FSN.CashAtBeginningOfPeriod` are hidden from Exc
 | `FSN.GLAccountCategoryBalance(…, "Asset")` | `FSN.GLAccountBalance(…, FSN_L1_AST)` |
 | `FSN.CashAtBeginningOfPeriod(…)` | `FSN.GLAccountBalance(…, FSN_L4_CBP)` |
 
-One of them that already appears in a user's workbook works, and needs no rewrite unless the user asks. `FSN.GLAccountNetIncome` and `FSN.GLAccountRetainedEarnings` take fewer arguments than `GLAccountBalance`, so their custom segment arguments start at the 13th argument (`GLAccountNetIncome`) and the 12th (`GLAccountRetainedEarnings`), against the 15th for `GLAccountBalance`.
+One of them that already appears in a user's workbook works and needs no rewrite; rewrite it at the user's request. `FSN.GLAccountNetIncome` and `FSN.GLAccountRetainedEarnings` take fewer arguments than `GLAccountBalance`, so their custom segment arguments start at the 13th argument (`GLAccountNetIncome`) and the 12th (`GLAccountRetainedEarnings`), against the 15th for `GLAccountBalance`.
 
 ---
 
