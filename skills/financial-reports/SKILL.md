@@ -121,7 +121,7 @@ Type the values as plain text without quote marks: `FY 2026`, `FSN_L0_INC`, `Hea
 
 ### Inputs are never volatile
 
-Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous: two or more calls that depend on a volatile cell restart each other after every result, so Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
+Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous, so two or more calls that depend on a volatile cell can restart each other: with results that arrive at different times, such as a closed period served from the cache next to an open period fetched live, Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
 
 | Instead of | Use |
 |---|---|

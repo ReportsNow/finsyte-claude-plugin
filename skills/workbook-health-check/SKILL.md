@@ -106,7 +106,7 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 
 | Rule ID | What the rule flags | Severity | Fix mode |
 |---|---|---|---|
-| `VOLATILE_FUNCTION` | `NOW`, `TODAY`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, and `SUMIF` with a sum range of a different size from its range, in cells, conditional formatting and names. Cells already in an `FSN_VOLATILE_INPUT` finding are left out. | Info; Medium above 100 cells | Confirm for `INDIRECT`, `OFFSET` and the `SUMIF` size mismatch; Advise for the others |
+| `VOLATILE_FUNCTION` | `NOW`, `TODAY`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, and `SUMIF` with a sum range of a different size from its range, in cells, conditional formatting and names. A volatile function in a conditional formatting rule gets this finding as well as any `CONDITIONAL_FORMATTING` finding on that rule. Cells already in an `FSN_VOLATILE_INPUT` finding are left out. | Info; Medium above 100 cells | Confirm for `INDIRECT`, `OFFSET` and the `SUMIF` size mismatch; Advise for the others |
 | `WHOLE_COLUMN_REFERENCE` | References such as `A:A` and `1:1`. `SUMPRODUCT`, array formulas, spilling formulas and FSN calls process every cell of the column, about a million rows. `SUM`, `SUMIF` and similar functions stop at the last used row. A whole column inside `INDEX`, `COUNTA` or `MATCH` that only finds where a range ends is left out. | Medium inside `SUMPRODUCT`, array formulas, spilling formulas and FSN calls; Info elsewhere | Confirm for Medium; Info gets "No change needed" |
 | `RUNNING_TOTAL` | Running totals such as `=SUM($A$2:A2)` filled down. Each cell adds every row above it again. | Info; Medium above 2,000 rows | Confirm |
 | `LARGE_RANGE_LOOKUP` | More than 1,000 `SUMIFS`, `COUNTIFS` or exact-match lookups over ranges of more than 50,000 rows, such as a GL export or drilldown output | Info | Advise: a PivotTable or a summary built once from the data, or FSN calls in place of lookups over an export |
@@ -175,7 +175,7 @@ Custom segments are the last arguments of 15 FSN functions: one argument per cus
 | Hidden: `GLAccountRetainedEarnings` | 12 |
 
 1. For each one-call FSN formula that shows `#VALUE!` after causes 1 to 3 are ruled out, count the arguments from the start position to the end, empty ones included. A formula with no argument at or past the start position passes no segment arguments. Finsyte's templates pass segment arguments as references to parameter cells, such as `$C$9`: each reference is one argument, a reference to an empty cell counts as an empty argument, and the listed edit that removes one names the parameter cell.
-2. For the formulas that pass segment arguments, ask the user for the Segments Used count in Help › Preferences › Custom Segments, and whether a notice above the lists says that Finsyte functions use the custom segments of another company. With that notice, the functions take the other company's segments, and the count shown in the pane does not apply.
+2. For the formulas that pass segment arguments, ask the user for the Segments Used count in Help › Preferences › Custom Segments, and whether a notice above the lists says that Finsyte functions use the custom segments of another company. The question goes in the finding's Fix line in the first report, next to any listed removal of trailing empty arguments. With that notice, the functions take the other company's segments, and the count shown in the pane does not apply.
 3. Formulas that pass more segment arguments than the functions take are the cause: `FSN_SEGMENT_ARGUMENTS`.
 4. Trailing empty segment arguments filter nothing, so removing them keeps every result, whatever the count turns out to be. List that edit with the old and new formula in the first report, before the count is known, and remove the arguments after the user's yes.
 5. Segment arguments with values get advice. Segment setup is company-wide: a Finsyte administrator of the company sets up the segments in Help › Preferences › Custom Segments, and Excel restarts. For the segments of another company, the user clicks Switch Company, selects that company, and clicks Use for Custom Features; Finsyte's message then says whether Excel needs a restart. Both paths end with Refresh Data › Entire Workbook.
@@ -219,6 +219,7 @@ I changed nothing. I can step through the flagged cells one at a time, and I can
 ```
 
 - One finding is one rule and one cause. Within a severity, findings follow the order of the rule tables.
+- Every finding has the three lines of the template: what was found, `Why it matters:` and `Fix:`.
 - A problem that fits no rule goes under "Other" as Info, with advice.
 - "Not checked" lists the rules that could not run and why, such as a protected sheet that could not be read, a rule that a workbook file cannot show, or FSN values from a session without Finsyte.
 - The heading names the sheets checked. A check of the active sheet says in the heading that the other sheets were not checked.

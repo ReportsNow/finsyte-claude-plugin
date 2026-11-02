@@ -23,7 +23,7 @@
 | Names | `workbook.names` and each sheet's `names`: `name`, `formula`, `visible`, `type` |
 | Shapes | `worksheet.shapes`: the count, and `visible`, `width` and `height` of each shape |
 | Tables | `worksheet.tables`: each table's range, which sizes a static drilldown sheet |
-| PivotTables | `worksheet.pivotTables`: `refreshOnOpen`. Office.js shows no pivot caches. |
+| PivotTables | `worksheet.pivotTables`: `refreshOnOpen`. Office.js shows no pivot caches: copied caches go on the report's Not checked line, with no fix. |
 | Links | Formula and name text (SKILL.md, "Find FSN calls"). Excel for the web also lists them in `workbook.linkedWorkbooks`. |
 | Precedents | `getPrecedents()` on input cells, as below |
 
