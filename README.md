@@ -2,9 +2,12 @@
 
 [Finsyte](https://www.finsyte.com) is an Excel add-in for building financial reports and models on NetSuite data. Finance and FP&A teams, accountants, and board members work from Finsyte workbooks, and NetSuite stays the source of truth: every number is a live `=FSN.` formula that refreshes from NetSuite instead of being re-keyed.
 
-This plugin adds the **financial-reports** skill, which teaches Claude how Finsyte works so it can help you build new reports and models and change the ones you have. Claude starts from Finsyte's report templates, pulls any account, account type, or rollup with the right parameters, lays reports out by NetSuite account type the way NetSuite does, and keeps signs, totals, and segment arguments right. The result is a workbook that ties out to NetSuite and re-points to a new period or subsidiary by changing one cell.
+This plugin adds two skills.
 
-Claude uses the skill on its own whenever a request involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call it directly with `/finsyte:financial-reports`.
+- **financial-reports** teaches Claude how Finsyte works so it can help you build new reports and models and change the ones you have. Claude starts from Finsyte's report templates, pulls any account, account type, or rollup with the right parameters, lays reports out by NetSuite account type the way NetSuite does, and keeps signs, totals, and segment arguments right. The result is a workbook that ties out to NetSuite and re-points to a new period or subsidiary by changing one cell.
+- **workbook-health-check** reads a whole Finsyte workbook and reports what makes it slow to calculate, open, or save, and what can give wrong numbers. It changes nothing until you confirm the exact edits for a fix, and it uses the financial-reports skill for how Finsyte works.
+
+Claude uses the skills on its own whenever a request involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call them directly with `/finsyte:financial-reports` and `/finsyte:workbook-health-check`.
 
 ## What it helps with
 
@@ -14,7 +17,7 @@ Claude uses the skill on its own whenever a request involves Finsyte, FSN formul
 - Laying out rows and columns from NetSuite lists, so new departments, subsidiaries, and accounts show up on refresh
 - Replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas, then tying every converted cell back to the original
 - Diagnosing `#VALUE!`, `#NAME?`, `Invalid account number`, `#GETTING_DATA`, `#SPILL!`, and sign errors in FSN formulas
-- Running a health check on a workbook: volatile inputs, whole-column references, error cells, and other things that make a workbook slow or wrong, with fixes made only after you confirm them
+- Running a health check on a whole workbook with the workbook-health-check skill: volatile inputs, FSN errors, report totals and missing accounts, whole-column references, and other things that make a workbook slow or wrong, with fixes made only after you confirm them
 - Adding a check that flags GL accounts created in NetSuite after a report was built, so totals don't go stale silently
 
 ## Requirements
@@ -40,6 +43,10 @@ This plugin contains instructions and reference material only: Markdown files th
 All NetSuite access happens in the Finsyte add-in on your computer, under your NetSuite login and role. How Finsyte handles your data is described in the [Finsyte privacy policy](https://www.finsyte.com/privacy-policy).
 
 AI-generated output can contain errors. Review every report before relying on it; the skill's tie-out and QA steps are there to help with that.
+
+## For maintainers
+
+Finsyte conventions live in the financial-reports skill: functions, signs, formula conventions, and fixes for FSN errors. Topic skills such as workbook-health-check point to its sections and hold only their own rules, so a change to how Finsyte works is made in one place.
 
 ## Documentation and support
 

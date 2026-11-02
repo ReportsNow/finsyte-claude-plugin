@@ -1,6 +1,6 @@
 ---
 name: financial-reports
-description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas; or a health check of a Finsyte workbook that is slow or may give wrong results (volatile functions and inputs, whole-column references, error cells, used range, styles, links), and fixing what the check finds. Not for financial statements or accounting work outside Finsyte and NetSuite."
+description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
 ---
 
 # Finsyte for NetSuite
@@ -17,7 +17,6 @@ Load one only when the task needs it:
 | `references/model-building.md` | Building a model: a Drivers tab, dropdowns, department or subsidiary columns, budget vs actual, trailing twelve months, KPI and board summaries |
 | `references/converting.md` | Replacing hard-coded numbers in a spreadsheet or NetSuite export with Finsyte formulas, including CTA and the tie-out |
 | `references/functions.md` | You need a function's full argument list, the Range function arguments, worked period-range examples, the sign of each account type, or the full tree of `FSN_` codes |
-| `references/health-check.md` | The user asks for a health check, says a workbook is slow, or asks you to find and fix problems across a workbook: the checks, how to read the workbook, the report, and the fixes |
 
 ---
 
@@ -270,7 +269,7 @@ It returns one blank cell when nothing is missing and spills the missing account
 
 ## Workbook health check
 
-A health check reads the whole workbook, changes nothing, and reports each problem with its severity, its cells, why it matters, and the fix. You make a fix only after the user confirms the exact edits, and you keep the old formulas so the user can get them back. Follow `references/health-check.md`.
+A health check of a whole workbook, for what makes the workbook slow or gives wrong numbers, belongs to the `workbook-health-check` skill in this plugin. The health check skill points to the sections of this skill for its fixes.
 
 ---
 

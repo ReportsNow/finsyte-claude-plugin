@@ -1,3 +1,8 @@
+---
+name: workbook-health-check
+description: "Use when the user asks for a health check of a whole Excel workbook that uses Finsyte (=FSN. formulas that pull NetSuite data), or says a Finsyte workbook is slow to calculate, open or save, keeps recalculating, has grown too large, or may give wrong numbers across sheets: volatile functions and inputs, whole-column references, FSN errors across many cells, drilldown and query output, custom segment #VALUE!, report totals and missing accounts, used range, styles, conditional formatting, names, links, shapes and calculation settings; and for fixing what such a check finds. A question about one cell or one formula, or building or changing a report, belongs to the financial-reports skill."
+---
+
 # Workbook health check
 
 A health check reads a whole workbook and reports what makes the workbook slow to calculate, open or save, or what can give wrong results. Every finding carries a rule ID, a severity, the cells, why it matters, and the fix. The check itself changes nothing. You make a fix only after the user says yes to the exact edits you listed.
