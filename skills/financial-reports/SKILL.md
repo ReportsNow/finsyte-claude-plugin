@@ -121,7 +121,7 @@ Type the values as plain text without quote marks: `FY 2026`, `FSN_L0_INC`, `Hea
 
 ### Inputs are never volatile
 
-Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous: two or more calls that depend on a volatile cell restart each other after every result, so Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
+Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous: two or more calls that depend on a volatile cell restart each other after every result, so Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
 
 | Instead of | Use |
 |---|---|
@@ -255,9 +255,9 @@ It returns one blank cell when nothing is missing and spills the missing account
 
 ## Gotchas
 
-1. **`#VALUE!` after pointing a parameter at another cell.** A cell formatted as Text stores a formula as text (`=Drivers!$C$10` shows in the cell), and every call that reads it returns `#VALUE!`. The Period cell is Text-formatted on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow. Set the cell to General, then enter the formula. In Office.js, set `numberFormat` to General and sync before setting `formulas`; Period should read back as a number.
+1. **`#VALUE!` after pointing a parameter at another cell.** A cell formatted as Text stores a formula as text (`=Drivers!$C$10` shows in the cell). A call that reads it returns a message, such as `Invalid period number` for the Period, and a call with a leading minus shows `#VALUE!` in place of the message. The Period cell is Text-formatted on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow. Set the cell to General, then enter the formula. In Office.js, set `numberFormat` to General and sync before setting `formulas`; Period should read back as a number.
 2. **Wait for `#GETTING_DATA` to clear.** Finsyte pulls asynchronously. Values read while any cell shows `#GETTING_DATA` are partial, and a total that looks wrong mid-refresh is almost never a wrong code. Don't swap codes to fix it.
-3. **Never guess account numbers.** A number that doesn't exist returns `Invalid account number 'xxxx'`. Take numbers from `FSN.Range.AccountNumbers` or from the user's sheet.
+3. **Never guess account numbers.** A number that doesn't exist returns `Invalid account number`. Take numbers from `FSN.Range.AccountNumbers` or from the user's sheet.
 4. **`#SPILL!`.** Range functions, `Query`, `SavedSearch`, and `Dataset` spill, so leave room. An empty result is one blank cell.
 5. **Summary accounts in a flat list.** `FSN.Range.AccountNumbers` returns parent accounts with their children, and a parent's balance already includes its children. For a flat list totaled with `AGGREGATE`, set Posting Only (the 9th argument) to TRUE.
 6. **Rollup entries in segment lists.** `FSN.Range.Departments`, `.Classifications`, and `.Locations` include a `Parent (Hierarchy)` entry for each parent by default, which overlaps its children. For one column per department, set Include Rollup (the 7th argument) to FALSE.
@@ -282,7 +282,7 @@ Run these before handing over any report or model. Each one is pass or fail.
 3. **Nothing made up.** No `#NAME?` (such as `BudgetAccountNetIncome`), no `Invalid account number`, no invented `FSN_` codes.
 4. **Signs are right.** Credit-normal actuals negated once; budgets and CTA never negated; template rows not negated a second time.
 5. **Formulas you wrote follow the conventions.** No literals inside calls, Subsidiary filled in, one call per cell with nothing around it but `-`, totals as `AGGREGATE(9,0,…)`, and no line item written as an `AGGREGATE`. Finsyte's own template formulas are exempt.
-6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, or a `SUMIF` with ranges of different sizes.
+6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, or a `SUMIF` with ranges of different sizes.
 7. **The report is complete.** The missing-accounts check is present and clean on every report that lists accounts.
 8. **It re-points from one place.** Changing an input and refreshing updates every number, label, and title, and no `FY 20xx` or subsidiary name is typed anywhere but the input cells.
 9. **A converted sheet ties** to its original (`references/converting.md`).

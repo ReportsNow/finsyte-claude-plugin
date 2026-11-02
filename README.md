@@ -38,7 +38,9 @@ Claude writes the formulas. The Finsyte add-in evaluates them in Excel, against 
 
 ## What this plugin does and doesn't do
 
-This plugin contains instructions and reference material only: Markdown files that Claude reads. It contains no executable code or scripts, makes no network requests, and does not collect, store, or send any data. When Claude works in your workbook it writes Excel formulas, which the Finsyte add-in evaluates. A health check reads the formulas, values, and settings of the whole workbook and changes nothing until you confirm a fix. The plugin covers reporting with Finsyte's functions and does not create, change, or delete records in NetSuite.
+This plugin contains instructions and reference material only: Markdown files that Claude reads. It contains no executable code or scripts, makes no network requests, and does not collect, store, or send any data. When Claude works in your workbook it writes Excel formulas, which the Finsyte add-in evaluates. The plugin covers reporting with Finsyte's functions and does not create, change, or delete records in NetSuite.
+
+A health check reads the formulas, values, and settings of the whole workbook and changes nothing until you confirm a fix.
 
 All NetSuite access happens in the Finsyte add-in on your computer, under your NetSuite login and role. How Finsyte handles your data is described in the [Finsyte privacy policy](https://www.finsyte.com/privacy-policy).
 
