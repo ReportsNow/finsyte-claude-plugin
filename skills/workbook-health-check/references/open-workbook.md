@@ -4,6 +4,8 @@
 
 **Order.** Settings, then structure, then formulas, then FSN values. Read each sheet in blocks of rows that stay under the 5 MB request limit of Excel for the web and the 5,000,000-cell limit of one read, sheets with FSN formulas first.
 
+**Results.** Match the formulas inside the script and return grouped results: for each rule, the count, the cell ranges and up to ten sample formulas. The script compares each count with the rule's threshold: per sheet for a rule that counts on one sheet, such as `CONDITIONAL_FORMATTING` (100 rules) and `SHAPES` (500 shapes), and per workbook for the others. A large workbook sends no full formula list back to the chat.
+
 | Item | Call |
 |---|---|
 | Settings | `application.calculationMode` (`Automatic`, `AutomaticExceptTables` or `Manual`), `application.iterativeCalculation.enabled`, `workbook.usePrecisionAsDisplayed` |
@@ -21,7 +23,7 @@
 | Names | `workbook.names` and each sheet's `names`: `name`, `formula`, `visible`, `type` |
 | Shapes | `worksheet.shapes`: the count, and `visible`, `width` and `height` of each shape |
 | Tables | `worksheet.tables`: each table's range, which sizes a static drilldown sheet |
-| PivotTables | `worksheet.pivotTables`: `refreshOnOpen`, and `getDataSourceString()` to group PivotTables by source |
+| PivotTables | `worksheet.pivotTables`: `refreshOnOpen`. Office.js shows no pivot caches. |
 | Links | Formula and name text (SKILL.md, "Find FSN calls"). Excel for the web also lists them in `workbook.linkedWorkbooks`. |
 | Precedents | `getPrecedents()` on input cells, as below |
 

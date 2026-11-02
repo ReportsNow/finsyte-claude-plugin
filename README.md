@@ -9,6 +9,8 @@ This plugin adds two skills.
 
 Claude uses the skills on its own for any request that involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call them directly with `/finsyte:financial-reports` and `/finsyte:workbook-health-check`.
 
+A Finsyte skill added earlier from the Finsyte website, named finsyte-netsuite, is an older copy of financial-reports: turn it off after you install the plugin.
+
 ## What it helps with
 
 - Starting a balance sheet, income statement, cash flow statement, budget vs actual, or trial balance from Finsyte's templates, then customizing it in Excel

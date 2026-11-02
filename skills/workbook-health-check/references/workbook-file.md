@@ -22,8 +22,8 @@
 | Shapes | `xl/drawings/drawingN.xml`, the drawing named in the sheet's relationships: count the anchors. `hidden="1"` on `xdr:cNvPr` marks a hidden shape, and `a:ext cx="0" cy="0"` a zero-size shape. |
 | Conditional formatting | The `conditionalFormatting` and `x14:conditionalFormatting` elements of the sheet XML. A read-only worksheet has no `conditional_formatting`, and openpyxl drops the `x14` rules with the warning "Conditional Formatting extension is not supported and will be removed". |
 | Unique cell formats | `cellXfs count` in `xl/styles.xml`. Named styles are in `cellStyles`. |
-| External links | Every part in `xl/externalLinks`, including links that no formula uses. A formula stores a link as an index, such as `[1]Sheet1!A1`; the index follows the order of `externalReferences` in `xl/workbook.xml`, and the part's relationship holds the path. |
-| PivotTables and connections | `refreshOnLoad` in `xl/pivotCache/pivotCacheDefinitionN.xml` and in `xl/connections.xml` |
+| External links | Every part in `xl/externalLinks`, including links that no formula uses. A formula stores a link as an index, such as `[1]Sheet1!A1`, or `[1]!Total` for a name in the other workbook; the index follows the order of `externalReferences` in `xl/workbook.xml`, and the part's relationship holds the path. |
+| PivotTables and connections | `refreshOnLoad` in `xl/pivotCache/pivotCacheDefinitionN.xml` and in `xl/connections.xml`. The `cacheSource` of each pivot cache definition shows caches with one source. |
 | Data tables | `DataTableFormula` cells |
 | Static drilldown sheets | The table's `ref` in `xl/tables/tableN.xml` |
 | File size | Each part's size in the zip |
@@ -31,7 +31,7 @@
 **Names and sheets.** `wb.defined_names` and each sheet's names: the formula text and `hidden`. Sheet state `hidden` or `veryHidden`. Leave out Excel's own `_xlnm.` names.
 
 **Saved values.**
-- A `#VALUE!` cell with a `vm` attribute holds a newer error, such as `#SPILL!` or `#CALC!`, saved as `#VALUE!`. Report the error type it most likely holds, and leave the cell out of `FSN_ERROR_VALUE`.
+- openpyxl does not read the `vm` attribute: read it from the cell's `c` element in the sheet XML. A `#VALUE!` cell with `vm` holds a rich value: a newer error such as `#SPILL!` or `#CALC!` saved as `#VALUE!`, a picture placed in the cell, or a linked data type such as Stocks. `xl/metadata.xml` and `xl/richData/rdrichvalue.xml` lead from the `vm` number to the value's structure in `xl/richData/rdrichvaluestructure.xml`, where `_localImage` marks a picture. Pictures and data types are no errors. For an error, report the error type it most likely holds. Leave every `vm` cell out of `FSN_ERROR_VALUE`.
 - FSN cells saved as `#GETTING_DATA` were saved while Finsyte was still loading them: report the values as partial. A file gets no second read.
 - `#NAME?` in every FSN cell means the file was saved without Finsyte loaded.
 
