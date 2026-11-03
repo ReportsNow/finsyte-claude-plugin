@@ -1,6 +1,6 @@
 ---
 name: financial-reports
-description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
+description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill, and a multi-page board book to the board-book skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
 ---
 
 # Finsyte for NetSuite
@@ -270,6 +270,10 @@ It returns one blank cell when nothing is missing and spills the missing account
 ## Workbook health check
 
 A health check of a whole workbook, for what makes the workbook slow or gives wrong numbers, belongs to the `workbook-health-check` skill in this plugin. The health check skill points to the sections of this skill for its fixes.
+
+## Board book
+
+A multi-page board of directors package, with a cover, an index, and statements by month, quarter, year, subsidiary, segment and budget, belongs to the `board-book` skill in this plugin. A one-page board or KPI summary stays here (`references/model-building.md`).
 
 ---
 
