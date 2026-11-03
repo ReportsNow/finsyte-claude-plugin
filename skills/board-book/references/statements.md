@@ -27,7 +27,8 @@ A line is one of:
 | Single line | One account, or one `FSN_` code, with no account rows below it | One row with the account in B |
 | Group | Several accounts: a NetSuite parent and the accounts under it, the accounts of a type, or a set the user names | A header row, then one hidden detail row per posting account, then a hidden "Total ..." row. Collapsed, the header shows the total. A group of a whole type or a whole parent also has a hidden plug row, `Other <caption in lowercase>`, above its total (see "Completeness"). |
 | Group of lines | Lines that roll up under one caption, such as Cost of sales or an operating expense parent | A header row, then the lines (single lines, groups, a plug line) one outline level down, then a hidden "Total ..." row |
-| Plug line | "Other ..." : a rollup minus the lines beside it | One row of arithmetic |
+| Plug line | "Other ..." : a rollup minus the lines beside it | One row of arithmetic while no account sits in it. When the line plan leaves accounts in it, it is an Other group (see "Completeness"). |
+| Other group | A plug line that holds accounts when the book is built, such as Other current assets | A header row, one hidden detail row per account it holds, a hidden `Accounts not listed` plug row, then a hidden "Total ..." row |
 | Calculated line | Arithmetic on other rows, such as Gross profit or Retained earnings | One row of arithmetic |
 
 **Detail rows** are the posting accounts of the group in NetSuite's order: a summary account is never a detail row, its posting children are. A posting parent (an account with children that is not a summary account) is a detail row of its own, ahead of its children. Two outline levels below a visible line is the deepest: accounts deeper than that are listed at the second level.
@@ -53,7 +54,7 @@ A line is one of:
 | Subtotal | `1` | | Typed, bold | Value columns: `=AGGREGATE(9,0,<c><first row of the section>:<c><row above>)`. Change columns: the change formula. |
 | Plug line, calculated line | `1` | | Typed | Value columns: the arithmetic. Change columns: the change formula. |
 | Ratio (KPI) | `1` | | Typed | Value columns: `=IFERROR(<c><numerator>/<c><denominator>,0)`. Change columns: empty. |
-| Amount KPI | `1` | | Typed | Value columns: the arithmetic. Change columns: empty. |
+| Amount KPI | `1` | | Typed | Value columns: the arithmetic. Change columns: the change formula. |
 
 The Level formula is `=FSN.GetListInfo($B$20,$B<r>,$A$20)`, on a row whose B holds one account or one code. A row whose B holds several accounts joined with `^` takes `1`.
 
@@ -82,6 +83,7 @@ Finsyte returns balances as NetSuite stores them: debit-normal accounts positive
 The book stays complete as NetSuite changes: every total ties to a NetSuite rollup, and an account added in NetSuite later lands in an "Other" plug line without any change to the book.
 
 - **Plug line.** `Other <x> = <rollup row> − (<the lines beside it>)`. Subtract each line by its total row, or by its own row for a single line. When a line beside the plug holds accounts outside the plug's rollup, such as the affiliate group, subtract only the part inside the rollup: add a rollup row that lists those accounts and subtract it.
+- **Other group.** A plug line that holds accounts when the book is built (accounts of its rollup that no other line lists, such as the Other Current Asset accounts outside the named lines) lists them: a header row with the plug's caption and no account in B, one hidden detail row per account in NetSuite's order, then a hidden plug row `Accounts not listed` = `<rollup row> − (<the lines beside it>) − SUM(<first detail>:<last detail>)`, then the hidden total. The plug row reads 0 until NetSuite adds an account to the rollup. This applies to every Other line of the trees except Other equity on the balance sheet and Other income (expense), net, which name their accounts in B. Other equity on the cash flow is an Other group: it lists the retained earnings and translation adjustment accounts. With every account on a row, the missing-accounts check passes until NetSuite adds an account.
 - **Group plug row.** A group of a whole type (such as Bank, Fixed Asset or Accounts Payable) or of a whole parent ends with a hidden plug row above its total: `Other <caption in lowercase> = <the group's rollup row> − SUM(<first detail>:<last detail>)`. It reads 0 until NetSuite adds an account to the type or under the parent, and then it carries that account until the user asks for it to be listed. In a group with sub-groups, subtract each sub-group's total row and each detail row by name in place of the `SUM`: a `SUM` over a header row would count it. The group's rollup row has the header's B and uses the same formula as the group's detail rows (the balance range for Cash at end of period). When accounts of the type or parent sit on another line, such as a lease liability shown on its own line or depreciation under an expense sub-parent, the plug row also subtracts a rollup row that lists those accounts. A group of accounts the user picked one by one has no plug row: the section's plug line catches what it leaves out.
 - **A whole type is always a group.** Credit card, Deferred revenue and any other line that holds a whole type is a group with its plug row, even with one account today, so an account NetSuite adds later still lands on the line.
 - **Exclude Filters** read Inputs cells, never typed text: `IntercompanyAccounts` for the intercompany accounts, and `CashExtraAccounts` for Undeposited Funds when the user counts it as cash (`references/front-pages.md`). Both hold accounts joined with `^`, and either can be empty. They are the only two: every other account that sits on another line leaves a rollup through a subtracted rollup row, as above.
@@ -260,7 +262,7 @@ Every row of the block below the header is hidden at outline level 1. `<last col
 | `CF-MQY` | Month and quarter cash equal year cash | In F: `=ROUND(ABS(F<end>-P<end>)+ABS(K<end>-P<end>),0)`, with `<end>` the Cash at end of period row | Error |
 | `BS-ACTIVITY`, `IS-MONTH`, `CF-MONTH`, `IS-BUD-MONTH` | Sum of months less total | In the Total column only: `=ROUND(SUM($F<x>:INDEX($F<x>:$Q<x>,Period))-<Total><x>,0)` for Total assets (`BS-ACTIVITY`), Net income and Total revenues (`IS-MONTH`, `IS-BUD-MONTH`), Net increase in cash (`CF-MONTH`) | Error |
 | `BS-CONSOL`, `IS-CONSOL`, `CF-CONSOL` | Sum of subsidiaries less consolidated | In the Consolidated column: the member columns' sum − Consolidated, for Total assets and Total liabilities and equity (balance sheet), Total revenues and Net income (operations), Net increase in cash (cash flow) | Review: members left out, such as one on another fiscal calendar, make it differ |
-| Segment pages | Sum of segment columns less total | In the Total column: the member columns and the No column − Total, for the same rows | Review: overlapping `(Hierarchy)` members, members left out and inactive values make it differ |
+| Segment pages without an All other column | Sum of segment columns less total | In the Total column: the member columns and the No column − Total, for the same rows | Review: overlapping `(Hierarchy)` members and inactive values make it differ |
 | `IS-BUD-CONSOL` | Sum of subsidiary budgets less consolidated budget | In the Consolidated budget column, for Total revenues and Net income | Review |
 
 **Missing accounts** (`BS-MQY` and `IS-MQY`). Two rows in the checks block, below the check rows:
@@ -270,17 +272,17 @@ Every row of the block below the header is hidden at outline level 1. `<last col
 | Exclude list | | `Accounts on this page (exclude list)` | | `=TRANSPOSE(FILTER($B$<first>:$B$<last>,$B$<first>:$B$<last><>""))`, the body rows |
 | Missing | `FSN_L0_BAL` (`BS-MQY`) or `FSN_L0_INC` (`IS-MQY`) | the check caption | `=IFERROR(IF(COUNTA(F<r>#)=COUNTBLANK(F<r>#),"OK","Review"),"Error")` | `=FSN.Range.AccountNumbers($B<r>,$F$<exclude list>#,Subsidiary,,TRUE,FALSE,FALSE,TRUE,TRUE)` |
 
-Both spill across, so leave the rest of each row empty. The exclude list keeps the codes in B, so a group of a whole type or parent counts every account under it as placed, new ones in its plug row included. What the check lists are accounts that sit only in a section's Other line (Other current assets, Other current liabilities, Other equity, Other revenue, Other cost of sales, Other operating expenses), or nowhere if the line plan missed them. The totals are right either way, so the status is Review. Tell the user which accounts are listed, and offer to add them to a line.
+Both spill across, so leave the rest of each row empty. The exclude list keeps the codes in B, so a group of a whole type or parent counts every account under it as placed, new ones in its plug row included. What the check lists are accounts no row names: accounts NetSuite added after the build, which sit in a plug line or an Other group's `Accounts not listed` row, and accounts the line plan missed. A new build passes: every account the plug lines hold is a detail row of an Other group. The totals are right either way, so the status is Review. Tell the user which accounts are listed, and offer to add them to a line.
 
 ---
 
 ## Row formats
 
-- **Font:** Times New Roman 10 pt in the body. The checks block: 8 pt, color `#595959`; its header bold, color `#808080`, fill `#F2F2F2`.
+- **Font:** Times New Roman 10 pt, from the Normal style (`references/excel-mechanics.md`, "Formatting calls"). The checks block's content cells: 8 pt, color `#595959`; its header bold, color `#808080`, fill `#F2F2F2`.
 - **Bold:** captions, group totals, subtotals, Gross profit, Operating income, Net income, the net cash lines, Net increase in cash, Cash at end of period.
 - **Borders**, on the value and change cells of the row: a thin top border on group totals, subtotals and the bold calculated lines; a thin top and a double bottom border on Total assets, Total liabilities and equity, Net income (operations) and Cash at end of period.
 - **$ format** (`references/pages.md`, "Number formats"): the first line under each caption that starts a section, with its first detail row and its total; every row the trees above mark $. Other rows take the amount format; ratio and percent KPIs their own.
 - **Outline:** detail rows, a group of lines' lines and its total, KPI rows and the checks block are hidden. Group them with Excel outline groups, one level per depth.
 - **Band:** a conditional format over C, from the first body row to the last KPI row and across to the last print column: `=MOD(SUBTOTAL(103,$A$<first>:$A<first>),2)=1`, fill `#CCEEFF`. It shades every other visible row.
-- **n/m:** on each `% Change` and `% Variance` column over the body: a conditional format `=AND(ISNUMBER(<top cell>),ABS(<top cell>)>9.99)` with the number format `"n/m";"n/m";"n/m"`.
+- **n/m:** one conditional format over the body of every `% Change` and `% Variance` column of the page, as one multi-area range: `=AND(ISNUMBER(<top cell of the first area>),ABS(<top cell of the first area>)>9.99)` with the number format `"n/m";"n/m";"n/m"`.
 - **Status colors:** on the E status cells and the Overall cell: `OK` bold green `#008000`, `Error` bold red `#C00000`, `Review` bold orange `#C65911`.

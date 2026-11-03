@@ -56,7 +56,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 4. **Round 1** of the interview. Write Inputs C5, C11 and C14 and their names, then **discovery, part 2:** periods, the subsidiary tree, segments, the chart of accounts.
 5. **Rounds 2 to 4.** Draft the line plan for round 3 from the chart of accounts.
 6. **The build plan.** Wait for a yes.
-7. **Build**, in this order: the rest of Lists; Inputs (with the line plan in its notes); Cover; each report page, in page order; Index; then `BookChecks` on Inputs. For each page: frame and titles, parameter block, headings, body rows, checks block, number formats and fonts, outline, conditional formats, page setup.
+7. **Build**, in this order: the rest of Lists; Inputs (with the line plan in its notes); Cover; each report page, in page order; Index; then `BookChecks` on Inputs. Before the first page, set the Normal style's font (`references/excel-mechanics.md`, "Formatting calls"). For each page: frame and titles, parameter block, headings, body rows, checks block, number formats and fonts on the content cells only, outline, conditional formats, page setup, then the used-range check.
 8. **Wait for values** (`references/excel-mechanics.md`, "Waiting for values").
 9. **Verify** (below), fix your own mistakes, and wait and verify again after each fix.
 10. **Clean up:** clear the discovery area on Lists, hide Lists, collapse the outlines, and select Cover A1.
@@ -75,7 +75,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 | Net change in cash less change in bank balances | A cash flow line outside the subtotal ranges | Never: it ties by construction |
 | Effect of exchange rates within materiality | A balance sheet line missing from the cash flow tree; a wrong sign | Real translation effects; accounts the line plan left out of the cash flow. On segment pages it reads the Total columns only. |
 | Sum of months less total | A month column with the wrong period or range | Never |
-| Sum of subsidiaries or segment columns less total (Review) | A column with the wrong parameter | Overlapping `(Hierarchy)` members; members left out, such as one on another fiscal calendar; inactive segment values that still hold balances |
+| Sum of subsidiaries or segment columns less total (Review) | A column with the wrong parameter | Overlapping `(Hierarchy)` members; subsidiaries left out of the consolidating columns, such as one on another fiscal calendar; inactive segment values that still hold balances |
 | Accounts not listed on this page (Review) | | New or unlisted accounts, now in Other lines |
 
 3. **Tie across pages.** Net income on page 2 (year column) equals net income on pages 1 and 3 (year column), and cash at end of period on page 3 equals cash on page 1. The month and cumulative pages agree with page 2 and page 3 at the book's period.
@@ -105,7 +105,7 @@ Then the one optional manual step: Office.js puts each outline button below its 
 Read the pages before you change them: the line plan is on Inputs (E3 down) and in the rows of any page of the statement.
 
 - **Roll forward.** Change Current fiscal year and Period on Inputs, and nothing else. Wait for values, then read Book checks. Never rebuild for a new period.
-- **List a new account.** Insert a row inside the group, between its first and last detail rows, so the group's ranges grow; copy the formulas of the detail row above; type the account in B. Do it on every page of that statement and on the matching cash flow line. A group plug row's `SUM` range grows with the insert; in a group with sub-groups, where the plug row subtracts rows by name, add the new row to its subtraction. The section's Other line subtracts the group's total, so the account leaves the Other line by itself.
+- **List a new account.** Insert a row inside the group, between its first and last detail rows, so the group's ranges grow; copy the formulas of the detail row above; type the account in B. Do it on every page of that statement and on the matching cash flow line. A group plug row's `SUM` range grows with the insert; in a group with sub-groups, where the plug row subtracts rows by name, add the new row to its subtraction. The section's Other line subtracts the group's total, so the account leaves the Other line by itself. An account in an Other group's `Accounts not listed` row is listed the same way, as a detail row of that Other group or of another group.
 - **Change a column's member.** Change the entry on Inputs (H, J, L or N). Adding or removing a column: copy a member column, or delete one, on every page of that group, resize the list's name on Inputs, and update the sum checks.
 - **Add a page or a page group.** Build it from `references/pages.md` with the existing Inputs and line plan, insert it in page order, renumber the sheets after it, and update the Index, its links and `BookChecks`.
 - **Rename a caption.** Type over it on every page of the statement and in the Inputs notes.
@@ -116,6 +116,7 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 |---|---|
 | A single company, or a subsidiary with no children | No consolidating pages and no page 24. Scope reads Subsidiary, and the titles drop "Consolidated". |
 | Elimination subsidiary | The last consolidating column. Left out of page 24 and of Affiliates. |
+| An inactive subsidiary | Not in `ListSubsidiaryMembers`, so never a column. When the user names one, look for it in `=FSN.Range.Subsidiaries(,,,TRUE,FALSE)`: if it's there, say it is inactive, not missing. Its balances can still count in the `(Consolidated)` column; then the sum check reads Review. |
 | A member with another fiscal calendar | Left out of the consolidating columns by default (round 2): its period numbers fall on other months. The sum check then reads Review, and the report says why. |
 | More than one currency | Every value column passes `ReportCurrency`. Budgets have no currency argument: say so when budgets of different currencies meet on page 24. |
 | A segment unused, or no budget categories | Leave out its pages. |

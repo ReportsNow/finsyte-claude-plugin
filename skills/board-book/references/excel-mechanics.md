@@ -98,9 +98,16 @@ From the table:
 
 ## Formatting calls
 
+**Format only the cells that need it.** Excel stores formatting cell by cell. Empty cells that carry formatting make the file larger and slower to open, save and calculate, and Excel's Check Performance flags them as unused formatting.
+
+- **The font comes from the Normal style.** Before the first format call, set it once: `const normal = context.workbook.styles.getItem("Normal"); normal.font.name = "Times New Roman"; normal.font.size = 10;`. Every cell then has the book's font with no cell formatting. Format calls set only bold, italic, color or a size other than 10. Never set the font name on a range.
+- **A row's content cells, never a block.** Format the cells that hold something, and the value and change cells a border, fill or number format must cover. Never format a whole page, a whole row or column, or a rectangle to the last column. Spacer columns take a width and nothing else; the list column and its spill area, and the rows below the checks block, take no formatting.
+- **One conditional format per purpose per page**, on one range, or on several areas at once through `sheet.getRanges("I23:I182,N23:N182,S23:S182").conditionalFormats.add(...)`. Relative references cover every column: the future months are one rule over F to Q with `=F$8>Period`, never one rule per column.
+- **Check each page.** `sheet.getUsedRange()` and `sheet.getUsedRange(true)` (values only) end on the same row and column. When the first is larger, formatting reached past the content: `range.clear(Excel.ClearApplyTo.formats)` on the extra rows and columns.
+
 | Format | Call |
 |---|---|
-| Font | `range.format.font.name = "Times New Roman"`, `.size`, `.bold`, `.italic`, `.color = "#156082"` |
+| Font | Name and size: the Normal style, above. On a range: `range.format.font.bold`, `.italic`, `.size` for another size, `.color = "#156082"` |
 | Fill | `range.format.fill.color = "#CCEEFF"` |
 | Borders | `range.format.borders.getItem("EdgeTop").style = "Continuous"`; `getItem("EdgeBottom").style = "Double"` |
 | Indent | `range.format.indentLevel = 2` |
@@ -108,7 +115,7 @@ From the table:
 | Wrap | `range.format.wrapText = true`, and `range.format.rowHeight` for two lines |
 | Column width | `range.format.columnWidth` is in points: points = (characters × 7 + 5) × 0.75, so 14.6 characters is about 80 points, 1.4 about 11, 3.6 about 23, 10 about 56 |
 | Hidden column | `sheet.getRange("A:B").columnHidden = true` |
-| Number format | `range.numberFormat = [[...]]`, a 2-D array the size of the range, or one value set on each column's range |
+| Number format | `range.numberFormat = [[...]]`, a 2-D array the size of the range, on the amount cells of the rows that hold amounts |
 | Conditional format | `const cf = range.conditionalFormats.add(Excel.ConditionalFormatType.custom); cf.custom.rule.formula = "=MOD(SUBTOTAL(103,$A$22:$A22),2)=1"; cf.custom.format.fill.color = "#CCEEFF";` Relative references are read from the range's top-left cell. For n/m: `cf.custom.format.numberFormat = '"n/m";"n/m";"n/m"'`. For statuses: `cf.custom.format.font.color` and `.bold`. |
 | Freeze panes | `sheet.freezePanes.freezeRows(<first body row> - 1)` |
 | Tab color, gridlines, hidden sheet | `sheet.tabColor = "#2E75B6"`, `sheet.showGridlines = false`, `sheet.visibility = Excel.SheetVisibility.hidden` |

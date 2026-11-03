@@ -167,7 +167,7 @@ Page 2's columns and headings, with Range `=RangeMTD` in F and G, `=RangeQTD` in
 
 `INDEX($F<r>:$Q<r>,Period)` is the month column at the book's period.
 
-**Months after the book's period.** On pages 4 to 7, 9 and 10, the actual month columns after the book's period would show open periods to the board. Give the body of each month column a conditional format `=<c>$8>Period` with the number format `;;;`, so those months show blank and reappear as the book rolls forward. The budget pages (25, 26) show every month: the full-year budget is the point.
+**Months after the book's period.** On pages 4 to 7, 9 and 10, the actual month columns after the book's period would show open periods to the board. Give the body of the month columns, F to Q, one conditional format `=F$8>Period` with the number format `;;;`, so those months show blank and reappear as the book rolls forward. The budget pages (25, 26) show every month: the full-year budget is the point.
 
 ### Page 4, `BS-MONTH`
 
@@ -293,13 +293,14 @@ One member column per entry of the page's list on Inputs (`DepartmentColumns`, `
 |---|---|---|---|---|---|---|---|
 | Each member | Actual | `=Subsidiary` | `=INDEX(<list>,<k>)` | `=CurFY` | as the statement (table above) | first member: the member heading (table above), across the members | `=<c>$<segment row>` |
 | No segment | Actual | `=Subsidiary` | `<None>` | `=CurFY` | same | `No` | `Department`, `Class` or `Location` |
+| All other | Only when the columns leave out a top-level value. On every row that holds a Finsyte formula, body and checks block: `=<Total><r>-SUM(<first member><r>:<No segment><r>)`. Every other row: as in a value column. | empty | empty | empty | empty | `All Other` | `Departments`, `Classes` or `Locations` |
 | Spacer | | | | | | | |
 | Total | Actual | `=Subsidiary` | empty | `=CurFY` | same | `Total` across Total and Prior year | `=CovCY` |
 | Prior year | Actual | `=Subsidiary` | empty | `=PriorFY` | same | | `=CovPY` |
 | % Change | `=IFERROR((<Total><r>-<Prior year><r>)/ABS(<Prior year><r>),0)` | | | | | | `% Change` |
 | Spacer | | | | | | | |
 
-Period is `=Period` and Currency `=ReportCurrency` in every value column. The No column passes `<None>`, the transactions with no value in the segment, so the members and the No column add up to the Total when the members don't overlap.
+Period is `=Period` and Currency `=ReportCurrency` in every value column. The No column passes `<None>`, the transactions with no value in the segment, so the members and the No column add up to the Total when the members don't overlap. When the user picks only some top-level values, the All other column holds the values left out, so the columns still add up to the Total.
 
 ---
 
