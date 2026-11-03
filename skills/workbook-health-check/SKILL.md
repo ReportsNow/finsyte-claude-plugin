@@ -5,7 +5,7 @@ description: "Use when the user asks for a health check of a whole Excel workboo
 
 # Workbook health check
 
-A health check reads a whole workbook and reports what makes the workbook slow to calculate, open or save, and what can give wrong numbers. Every finding carries a rule ID, a severity, the cells, why the finding matters, and the fix. The check itself changes nothing. You make a fix only after the user says yes to the exact edits you listed.
+A health check reads a whole workbook and reports what makes the workbook slow to calculate, open or save, and what can give wrong numbers. Every finding carries a rule ID, a severity, the cells, why the finding matters, and the fix. The check itself changes nothing. You make one fix at a time, each after the user says yes to the exact edits you listed for it.
 
 ## The Finsyte skill
 
@@ -16,7 +16,7 @@ Without the Finsyte skill, tell the user that the Finsyte skill is missing, run 
 ## Ground rules
 
 1. **The check writes nothing.** No edits, no temporary sheets or test cells, no Calculate, no Refresh Data. Read only.
-2. **Every fix needs a yes to the listed edits.** List each edit with the cell, the old formula and the new formula, then wait. A request such as "fix all of it" asks for that list. The user's yes to the list starts the edits.
+2. **Every fix needs its own yes.** Make one fix at a time. List the edits of one fix, with the cell, the old formula and the new formula of each edit, then wait. The user's yes starts the edits of that fix and no others. After the tie-out, report the result, then list the next fix and wait for its yes. A request such as "fix all of it", or a yes given before any list, starts with the first fix's list. Take the fixes in the order the user names, or in the report's order. The user sees each fix's tie-out before the next edit.
 3. **Keep the old formulas and settings.** Before an edit, record the old formula of every cell the edit touches, the old number format for a format change, the name, formula, scope and visibility of a name the edit deletes, and the old value of a setting the edit changes. Restore them at the user's request. The restore covers formulas, number formats, names and settings: a deleted style stays deleted, and the listed edit says so. Excel's Undo does not always cover edits made by an add-in.
 4. **Re-read before you edit.** The workbook can change after the check.
 5. **Tie out every fix.** Before the edit, record the values of the cells the fix changes and of the FSN cells that read them. After the edit, wait for `#GETTING_DATA` to clear, and compare. Report every difference. Cells that showed an error before the fix, and a total that counted a subtotal twice, are expected to change. Under Manual calculation the values are stale: ask the user to press F9 before you record the values and again after the edit. A tie-out needs Finsyte running (see "Run the check", step 3): a paused Finsyte returns 0.
@@ -25,14 +25,15 @@ Without the Finsyte skill, tell the user that the Finsyte skill is missing, run 
 
 | Thought | Reality |
 |---|---|
-| "The user said to fix all of it, so the confirmation can go." | "Fix all of it" asks for the list. List the edits and wait for the yes. |
-| "The meeting is in an hour, so one write is fine." | A deadline changes nothing: list, yes, then edit. |
+| "The user said to fix all of it, so the confirmation can go." | "Fix all of it" asks for the first fix's list. List its edits and wait for the yes. |
+| "The user already said yes to everything, so one round covers every fix." | A yes covers the one fix whose edits you listed. Make that fix, tie it out, then list the next fix. |
+| "The meeting is in an hour, so one write is fine." | A deadline changes nothing: list, yes, then edit, one fix at a time. |
 | "A temporary sheet to test the cause is harmless." | A test sheet is an edit. Read what you need, or ask the user. |
 | "I'll clear the formatting past the data myself." | Excel's Check Performance does that cleanup, and Undo works there. Point the user to it. |
 | "The skill says nothing about returning a fixed file." | Rule 7: a workbook file gets a report only. |
 | "The values match, so the fix tied out." | A paused or signed-out Finsyte shows 0 or empty text. Confirm Finsyte is running before any tie-out. |
 
-Stop and list the edits at any of these words in your own plan: "no confirmation round", "a temporary sheet", "I fixed what I could", a file name ending in `_fixed`.
+Stop and list the edits of one fix at any of these words in your own plan: "no confirmation round", "all the fixes at once", "a temporary sheet", "I fixed what I could", a file name ending in `_fixed`.
 
 ## Run the check
 
@@ -215,7 +216,7 @@ Other
 
 Not checked: <rule IDs> (<reason>).
 
-I changed nothing. I can step through the flagged cells one at a time, and I can make the Confirm fixes after you say yes to the edits I list.
+I changed nothing. I can step through the flagged cells one at a time, and I can make the Confirm fixes one fix at a time, each after you say yes to its edits.
 ```
 
 - One finding is one rule and one cause. Within a severity, findings follow the order of the rule tables.
@@ -228,7 +229,7 @@ I changed nothing. I can step through the flagged cells one at a time, and I can
 
 ## Fixes
 
-Each fix follows the ground rules: the list, the yes, the old formulas kept, the edit, the tie-out. After the tie-out, run the rule again on the edited cells and report the result.
+Each fix follows the ground rules: its own list and yes, the old formulas kept, the edit, the tie-out. After the tie-out, run the rule again on the edited cells, report the result, and then list the next fix.
 
 | Rule ID | Fix |
 |---|---|
