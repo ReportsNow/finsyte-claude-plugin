@@ -46,11 +46,12 @@ Returns the balance of an account, or of a set of accounts, for the slice of dat
 
 - A posting account number.
 - A summary (parent) account: returns the parent and its children, so don't also add the children in the same total.
-- `FSN_L1_*`, `FSN_L2_*`, `FSN_L3_*`: every account in that category, group, or account type.
+- A posting parent, an account with children that takes postings itself: returns its own postings only. Its children need rows of their own.
+- `FSN_L1_*`, `FSN_L2_*`, `FSN_L3_*`: every account in that category, group, or account type, inactive accounts included.
 - `FSN_L0_INC`: the whole income statement. `FSN_L0_BAL` returns "Not Supported".
 - `FSN_L4_NIN` net income, `FSN_L4_RET` retained earnings (non-zero only under `YTD`), `FSN_L4_CBP` cash at the beginning of the period.
 - A statistical account: returns its amount, the same as `FSN.StatAccountAmount`.
-- Several accounts as a `^` string, a range, or a named range: returns their total. `FSN_L4_NIN` and `FSN_L4_RET` can't be part of a list.
+- Several accounts or codes as a `^` string, a range, or a named range: returns their total, each account once. A code or a summary account in the list brings in the accounts under it. `FSN_L4_NIN` and `FSN_L4_RET` can't be part of a list.
 
 **Notes:**
 
