@@ -62,7 +62,7 @@ The Level formula is `=FSN.GetListInfo($B$20,$B<r>,$A$20)`, on a row whose B hol
 
 **Dynamic captions.** A row the user reads as income or loss takes a caption from the signs of its value cells: `=IF(MIN(<value cells>)>=0,"<positive>",IF(MAX(<value cells>)<=0,"<negative>","<mixed>"))`, with every value column of the row listed, such as `F143,G143,K143,L143,P143,Q143`. The captions are in the trees below, written `positive / negative / mixed`.
 
-**Account lists.** A rollup row, and any line whose accounts are a code or a parent, reads its accounts from a list that spills across in the list column (`references/pages.md`, "Page frame"): `=FSN.Range.AccountNumbers($B<r>,<exclude>,,,TRUE,FALSE,TRUE,TRUE)`, then the value formula takes `$<list column><r>#` as its account. The arguments: Include Filter from B; Exclude Filter (empty, or an Inputs name, "Completeness"); every subsidiary; every level; children included; Finsyte's own rollups left out; inactive accounts included, so a balance left in an inactive account still counts; spilled across. Column B holds what the list reads: a code, a parent account, several of them joined with `^`, or accounts and codes mixed. `FSN_L4_NIN` takes no list: put it in B and use the Actual formula.
+**Account lists.** A rollup row, and any line whose accounts are a code or a parent, reads its accounts from a list that spills across in the list column (`references/pages.md`, "Page frame"): `=FSN.Range.AccountNumbers($B<r>,<exclude>,,,TRUE,FALSE,TRUE,TRUE)`, then the value formula takes `$<list column><r>#` as its account. The arguments: Include Filter from B; Exclude Filter (empty, or an Inputs name, "Completeness"); every subsidiary; every level; children included; Finsyte's own rollups left out; inactive accounts included, so a balance left in an inactive account still counts; spilled across. Column B holds what the list reads: a code, a parent account, several of them joined with `^`, or accounts and codes mixed. `FSN_L4_NIN`, `FSN_L4_RET` and the `FSN_L0_INC` rows for net income and retained earnings take no list: put the code in B and use the Actual formula, or the "Actual, balance range" formula for retained earnings.
 
 ---
 
@@ -72,7 +72,7 @@ Finsyte returns balances as NetSuite stores them: debit-normal accounts positive
 
 | Statement | Reversed (leading `-`) on actual columns | As returned |
 |---|---|---|
-| Balance sheet | Liability and equity accounts; the net income line; the retained earnings list; the `FSN_L3_OCL` and `FSN_L3_EQU` rollups | Asset accounts; the affiliate lines; the `FSN_L2_CAS`, `FSN_L1_AST` and `FSN_L1_LEQ` rollups and the intercompany rollups |
+| Balance sheet | Liability and equity accounts; the net income line; the `FSN_L0_INC` and `FSN_L4_RET` rollups; the `FSN_L3_OCL` and `FSN_L3_EQU` rollups | Asset accounts; the affiliate lines; the `FSN_L2_CAS`, `FSN_L1_AST` and `FSN_L1_LEQ` rollups and the intercompany rollups |
 | Operations | Income and Other Income accounts, contra-revenue accounts included; the `FSN_L3_INC`, `FSN_L3_OIN` and `FSN_L4_NIN` rollups | Cost of Goods Sold, Expense and Other Expense accounts and their rollups |
 | Cash flow | Every line of balance sheet accounts (an increase in an asset is cash used, an increase in a liability cash provided); the net income line; the change rollups of non-cash current assets, intercompany accounts, property and equipment and posted equity; the revenue rollup | Depreciation and amortization; the bank rollup; Cash at end of period |
 
@@ -88,7 +88,7 @@ The book stays complete as NetSuite changes: every total ties to a NetSuite roll
 - **A whole type is always a group.** Credit card, Deferred revenue and any other line that holds a whole type is a group with its plug row, even with one account today, so an account NetSuite adds later still lands on the line.
 - **Exclude Filters** read Inputs cells, never typed text: `IntercompanyAccounts` for the intercompany accounts, and `CashExtraAccounts` for Undeposited Funds when the user counts it as cash (`references/front-pages.md`). Both hold accounts joined with `^`, and either can be empty. They are the only two: every other account that sits on another line leaves a rollup through a subtracted rollup row, as above.
 - **Rollup rows** sit in the checks block below the footer and are never printed. Each one has its accounts or code in B, a caption that names them, and its list in the list column. In a budget column a rollup row uses the Budget formula, never reversed, with the same list; `FSN_L4_NIN` uses the Budget formula with the code, which returns budgeted net income.
-- **Net income on balance sheet and cash flow pages** comes from the income statement accounts, `FSN_L0_INC` as a list, not from `FSN_L4_NIN`. `FSN_L4_NIN` for a parent subsidiary includes its children, and it ignores a segment filter, so it is wrong in a member column. Keep `FSN_L4_NIN` for the check against the consolidated columns.
+- **Net income and retained earnings** read Finsyte's special accounts and the income statement accounts as codes, with no list. Net income on the balance sheet and cash flow pages reads `FSN_L4_NIN` in every column: Finsyte applies the column's subsidiary, department, class and location to it as to any account. Retained earnings is computed from `FSN_L0_INC` ("Balance sheet"). Check rows tie net income to `FSN_L0_INC` on the balance sheet and cash flow pages and to `FSN_L4_NIN` on the operations pages, and retained earnings to `FSN_L4_RET` ("Checks").
 
 ---
 
@@ -123,8 +123,8 @@ Intercompany accounts sit on Due from (to) affiliates only, whatever their type:
 | Total liabilities | Subtotal | From Accounts payable | Bold, top border, $ |
 | `Equity:` | Caption | | |
 | Paid-in capital and owners' accounts | Group | The Equity accounts the user keeps (default: every posting Equity account except the retained earnings and translation adjustment special accounts) | |
-| Retained earnings | Calculated | [`FSN_L0_INC` list at the balance range, reversed] − Net income | |
-| Net income | Single line, dynamic | B `FSN_L0_INC`; the Actual formula on its list, reversed | `Net income / Net loss / Net income (loss)` |
+| Retained earnings | Calculated | [`FSN_L0_INC` at the balance range, as a code, reversed] − Net income | |
+| Net income | Single line, dynamic | B `FSN_L4_NIN`; the Actual formula, reversed | `Net income / Net loss / Net income (loss)` |
 | Cumulative translation adjustment | Calculated | [`FSN_L1_AST` list] + [`FSN_L1_LEQ` list] − Retained earnings − Net income | Both lists as returned. On pages 14 to 22 the caption reads `Translation adjustment and balances not assigned to a segment`: a single department, class or location doesn't balance, and the difference lands here. |
 | Other equity | Plug | [`FSN_L3_EQU` list, reversed] − Paid-in capital. B: the retained earnings and translation adjustment special accounts, joined with `^`, so the missing-accounts check counts them as placed. | |
 | Total equity | Subtotal | From Paid-in capital | Bold, top border |
@@ -139,9 +139,9 @@ Intercompany accounts sit on Due from (to) affiliates only, whatever their type:
 
 The KPI rows are hidden at outline level 1 under `Key ratios:`.
 
-**Rollup rows (balance sheet):** one per group with a plug row; `FSN_L2_CAS` list; intercompany accounts, all entities; intercompany accounts in current assets; intercompany accounts in other current liabilities (reversed); intercompany liability accounts (as returned); `FSN_L3_OCL` list (reversed); `FSN_L3_EQU` list (reversed); `FSN_L1_AST` list; `FSN_L1_AST` as a code, no list (consolidated actual columns only); `FSN_L1_LEQ` list; `FSN_L0_INC` list at the balance range (reversed); `FSN_L4_NIN` (reversed, consolidated actual columns only). Leave out the intercompany rows when the book has no intercompany accounts.
+**Rollup rows (balance sheet):** one per group with a plug row; `FSN_L2_CAS` list; intercompany accounts, all entities; intercompany accounts in current assets; intercompany accounts in other current liabilities (reversed); intercompany liability accounts (as returned); `FSN_L3_OCL` list (reversed); `FSN_L3_EQU` list (reversed); `FSN_L1_AST` list; `FSN_L1_AST` as a code, no list (consolidated actual columns only); `FSN_L1_LEQ` list; `FSN_L0_INC` at the balance range, as a code (reversed), for Retained earnings; `FSN_L0_INC` as a code (reversed), for the net income check; `FSN_L4_RET` (reversed), for the retained earnings check. Leave out the intercompany rows when the book has no intercompany accounts.
 
-**Where Retained earnings reads the balance range.** Its rollup row uses the "Actual, balance range" formula: on the month-end and year-end columns row 19 holds `ITD`, so the income statement accounts since inception, less this year's net income, give retained earnings. On page 5 row 19 holds the period's own range, and retained earnings shows the change.
+**Where Retained earnings reads the balance range.** Its rollup row reads `FSN_L0_INC` with the "Actual, balance range" formula: on the month-end and year-end columns row 19 holds `ITD`, so the income statement accounts since inception, less this year's net income, give retained earnings. On page 5 row 19 holds the period's own range, and retained earnings shows the change.
 
 ---
 
@@ -177,7 +177,7 @@ Pages 2, 6, 7, 8, 12, 15, 18, 21 and 23 to 26. Indents: captions 0, lines 1, sub
 
 A line with no accounts for this subsidiary is left out. With no Cost of Goods Sold accounts, leave out Cost of sales and its KPI, and Gross profit equals Total revenues.
 
-**Rollup rows (operations):** one per group with a plug row; `FSN_L3_INC` list (reversed); `FSN_L3_COG` list; one list per expense group's parent; the depreciation and amortization accounts under each parent that holds some; `FSN_L3_EXP` list; `FSN_L3_OIN` list (reversed); `FSN_L3_OEX` list; `FSN_L4_NIN` (reversed on actual columns; in the consolidated columns only, actual and budget).
+**Rollup rows (operations):** one per group with a plug row; `FSN_L3_INC` list (reversed); `FSN_L3_COG` list; one list per expense group's parent; the depreciation and amortization accounts under each parent that holds some; `FSN_L3_EXP` list; `FSN_L3_OIN` list (reversed); `FSN_L3_OEX` list; `FSN_L4_NIN` (reversed on actual columns; the Budget formula in budget columns).
 
 ---
 
@@ -188,7 +188,7 @@ Pages 3, 9, 10, 13, 16, 19 and 22. Indirect method. Every line of balance sheet 
 | Caption | Kind | Accounts or formula | Notes |
 |---|---|---|---|
 | `Cash flows from operating activities:` | Caption | | |
-| Net income | Single line, dynamic | B `FSN_L0_INC`, its list, reversed | `Net income / Net loss / Net income (loss)`. $ |
+| Net income | Single line, dynamic | B `FSN_L4_NIN`, the Actual formula, reversed | `Net income / Net loss / Net income (loss)`. $ |
 | `Adjustments to reconcile net income to net cash:` | Caption | | Indent 1, bold |
 | Depreciation and amortization | Group | The operations tree's depreciation and amortization accounts, as returned | Indent 2. Left out when there are none. |
 | Changes in operating assets and liabilities | Group of lines | Accounts receivable; Inventories; Prepaid expenses; Due from (to) affiliates (the intercompany accounts, one detail row per account); the other named current-asset lines; `Other current assets` = [non-cash current assets] − (Accounts receivable, Inventories, Prepaid expenses, the other named current-asset lines) − [intercompany accounts in current assets], leaving Due from (to) affiliates out of the subtraction because it also holds liabilities; Accounts payable; the named liability lines; Credit card; Deferred revenue; Accrued and other current liabilities (the balance sheet's accrued groups, then `Other current liabilities` = [`FSN_L3_OCL` change, reversed] − (those groups, the named lines of this type) − [intercompany accounts in other current liabilities]); then the total | The same accounts, groups and plug rows as the balance sheet lines of the same names. Lines left out of the balance sheet are left out here. |
@@ -218,7 +218,7 @@ Pages 3, 9, 10, 13, 16, 19 and 22. Indirect method. Every line of balance sheet 
 
 **Purchases of property and equipment** assume that depreciation and amortization is credited to accumulated depreciation and amortization accounts of the Fixed Asset type. When the user says amortization is credited to Other Asset accounts, subtract the amortization accounts' total from Other assets instead, and confirm with the exchange rate check.
 
-**Rollup rows (cash flow):** one per group with a plug row; non-cash current assets, B `FSN_L3_ARE^FSN_L3_URE^FSN_L3_OCA^FSN_L3_DEX` (reversed); intercompany accounts in current assets (reversed); `FSN_L3_OCL` (reversed); intercompany accounts in other current liabilities (reversed); property and equipment, `FSN_L3_FAS` (reversed); posted equity, `FSN_L3_EQU` (reversed); bank change, B as the cash group's (as returned); cash at end of period, the same B at the balance range (as returned), for the group's plug row; revenue, `FSN_L3_INC` (reversed).
+**Rollup rows (cash flow):** one per group with a plug row; non-cash current assets, B `FSN_L3_ARE^FSN_L3_URE^FSN_L3_OCA^FSN_L3_DEX` (reversed); intercompany accounts in current assets (reversed); `FSN_L3_OCL` (reversed); intercompany accounts in other current liabilities (reversed); property and equipment, `FSN_L3_FAS` (reversed); posted equity, `FSN_L3_EQU` (reversed); bank change, B as the cash group's (as returned); cash at end of period, the same B at the balance range (as returned), for the group's plug row; revenue, `FSN_L3_INC` (reversed); `FSN_L0_INC` as a code (reversed), for the net income check.
 
 ---
 
@@ -243,7 +243,9 @@ Every row of the block below the header is hidden at outline level 1. `<last col
 | Balance sheet | Total assets less total liabilities and equity | Total assets − Total liabilities and equity |
 | Balance sheet | Total assets less ERP assets | Total assets − ([`FSN_L1_AST` list] + [intercompany liability accounts]). The affiliate group carries the intercompany liabilities on the asset side, net. |
 | Balance sheet | Asset accounts list less ERP total assets | [`FSN_L1_AST` list] − [`FSN_L1_AST` code] in the consolidated actual columns, `0` in the others. A difference means the lists miss accounts Finsyte's rollup counts. |
-| Balance sheet, operations | Net income less ERP net income | Net income − [`FSN_L4_NIN`] in the consolidated columns (every value column on the pages without members; Consolidated and Prior year on the consolidating pages; Total and Prior year on the segment pages; on the budget pages, the actual and budget columns read for `Subsidiary`); `0` in the others |
+| Operations | Net income less ERP net income | Net income − [`FSN_L4_NIN`] in every value column, budget columns included |
+| Balance sheet, cash flow | Net income less income statement accounts | Net income − [`FSN_L0_INC`] in every value column |
+| Balance sheet, except `BS-ACTIVITY` | Retained earnings less ERP retained earnings | Retained earnings − [`FSN_L4_RET`] in every value column |
 | Operations | Total revenues less revenue rollup | Total revenues − [`FSN_L3_INC`] |
 | Operations | Total cost of sales less COGS rollup | Total cost of sales − [`FSN_L3_COG`] |
 | Operations | Total operating expenses less expense rollup | Total operating expenses − [`FSN_L3_EXP`] |

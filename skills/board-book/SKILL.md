@@ -44,7 +44,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 | "Cash is usually 1000 and revenue 4000." | Read the chart of accounts. Numbers differ by company, and a wrong one returns "Invalid account number". |
 | "`TODAY()` gives the default period." | Discovery types last month's end date in a scratch cell. Inputs holds typed values. |
 | "`CELL("filename")` gives the page number." | `CELL` is volatile. Type the page number. |
-| "`FSN_L4_NIN` is net income everywhere." | It includes a parent's children and ignores segments. Net income on balance sheet and cash flow pages comes from the income statement accounts; `FSN_L4_NIN` checks the consolidated columns only. |
+| "`FSN_L4_NIN` is wrong in member and segment columns." | Finsyte applies the column's subsidiary, department, class and location to `FSN_L4_NIN` and `FSN_L4_RET` as to any account. Net income reads `FSN_L4_NIN` in every column, and the check rows tie it to the income statement accounts. |
 | "The check is off by 3; I'll adjust the plug." | Find the cause and report it. A plug that hides a difference hides it from the board. |
 | "I'll put the book in the user's report workbook." | Workbook names such as `Period` and `Subsidiary` clash with theirs. Use a new workbook. |
 | "One request writes the whole book." | Write page by page in batches under 5 MB, and sync after each. |
@@ -83,7 +83,8 @@ Then go on in the order of step 7 from the first thing missing: the next page, o
 |---|---|---|
 | Total assets less total liabilities and equity | A group's range misses a row; a liability row lacks its minus | Never: the book balances by construction |
 | Total assets less ERP assets; revenue, cost of sales, expense rollups | A detail row sits outside its group's range; a plug subtracts a line twice | An account on two lines; the intercompany accounts are wrong |
-| Net income less ERP net income | A sign; the net income list reads the wrong range | A posting in an account type outside the operations rollups |
+| Net income less ERP net income (operations) | A sign; a line outside the operations subtotals | A posting in an account type outside the operations rollups |
+| Net income less income statement accounts; retained earnings less ERP retained earnings | A sign; a wrong range in row 9 or row 19 | Never: both sides read the same income statement accounts |
 | Net change in cash less change in bank balances | A cash flow line outside the subtotal ranges | Never: it ties by construction |
 | Effect of exchange rates within materiality | A balance sheet line missing from the cash flow tree; a wrong sign | Real translation effects; accounts the line plan left out of the cash flow. On segment pages it reads the Total columns only. |
 | Sum of months less total | A month column with the wrong period or range | Never |
