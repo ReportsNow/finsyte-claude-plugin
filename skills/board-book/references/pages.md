@@ -1,6 +1,6 @@
 # Report pages
 
-Read this before you write a report page. It gives the frame every page shares, then each of the 26 pages: title, the statement it shows, and its columns with their parameters and headings. The rows of each statement are in `references/statements.md`. Names such as `CurFY` and `CovPEmd` are the workbook names in `references/front-pages.md`.
+Read this before you write a report page. It gives the frame every page shares, then each page of the page list: title, the statement it shows, and its columns with their parameters and headings. The rows of each statement are in `references/statements.md`. Names such as `CurFY` and `CovPEmd` are the workbook names in `references/front-pages.md`.
 
 ## Contents
 
