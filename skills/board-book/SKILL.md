@@ -34,7 +34,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 5. **Complete by construction.** Every statement section ends in a plug line against a NetSuite rollup, and every group of a whole type or parent ends in a plug row (`references/statements.md`, "Completeness"). Never drop a plug, a rollup or a check to make a page pass.
 6. **Values before checks.** Read checks only when no cell shows `#GETTING_DATA`. A check read from partial values says nothing.
 7. **Report what the checks find; never force them.** Fix your own build mistakes: a wrong row in a formula, a wrong sign, a group range one row short. A difference that comes from NetSuite, such as an account in an Other line or an exchange rate effect over materiality, goes in the report with its cause. Never type a number, change a check's formula or widen its tolerance to make it pass.
-8. **Keep the user posted.** Say which page you are building and how many values are still loading. If the user stops you, or the build fails partway, leave what is built, say what is missing, and offer to delete the book's sheets and names.
+8. **Build without stopping.** The plan's yes covers the whole book: go from page to page without stopping to report or ask, until the book is built, verified and reported. Keep the user posted with one status line between pages, such as "Page 4 of 26: Balance Sheets by month", and go straight on. When a reply ends before the book is done, its last line is `Built: Lists, Inputs, Cover and pages 1 to <n> of <N>. Reply "continue" to build from page <n+1>.`, with what was actually built. If the user stops you, or the build fails partway, leave what is built, say what is missing, and offer to delete the book's sheets and names.
 
 | Thought | Reality |
 |---|---|
@@ -46,6 +46,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 | "The check is off by 3; I'll adjust the plug." | Find the cause and report it. A plug that hides a difference hides it from the board. |
 | "I'll put the book in the user's report workbook." | Workbook names such as `Period` and `Subsidiary` clash with theirs. Use a new workbook. |
 | "One request writes the whole book." | Write page by page in batches under 5 MB, and sync after each. |
+| "Inputs and Cover are done; I'll stop and report." | The plan's yes covers the whole book. Post a status line and build the next page. |
 | "The first read looks fine." | Wait until no cell shows `#GETTING_DATA`, then read. |
 
 ## Build the book
@@ -61,6 +62,13 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 9. **Verify** (below), fix your own mistakes, and wait and verify again after each fix.
 10. **Clean up:** clear the discovery area on Lists, hide Lists, collapse the outlines, and select Cover A1.
 11. **Report** (below).
+
+**Resume a stopped build.** When the user says "continue", "resume" or "keep going" after a build stopped, pick up where it stopped; never rerun the interview or ask for the plan again. List the book's sheets and names. The last sheet written may be half done:
+
+- A report page: delete that sheet and build it again.
+- Lists, Inputs or Cover: other sheets read their names, so never delete them. Check each cell and name `references/front-pages.md` gives them and write the missing ones.
+
+Then go on in the order of step 7 from the first thing missing: the next page, or with every page there, the Index and `BookChecks`. Then steps 8 to 11.
 
 ## Verify
 
