@@ -22,7 +22,7 @@ Run these in order. The first three only read; nothing is written before all of 
 | A workbook for the book | The active workbook has no sheet named Inputs, Cover, Index, Lists or a number, and none of the names in `references/front-pages.md`, "Workbook names" | Ask the user to open a new blank workbook (File › New › Blank workbook) and ask again there. Names and sheets with these names would clash with the book's formulas, and a write would overwrite their sheet. |
 | Calculation mode | `application.calculationMode` | Record it. Under `Manual`, tell the user that the values appear only after F9, and ask them to press F9 when you wait for values. Don't change the setting: it applies to every open workbook. |
 | Dynamic arrays | `Office.context.requirements.isSetSupported("ExcelApi","1.12")`; then, once Lists exists, a test spill `=SEQUENCE(2)` in a discovery cell returns two rows | Stop. The book uses spills, `FILTER`, `TEXTJOIN`, `TEXTSPLIT` and `LET`, which need Microsoft 365. |
-| Finsyte loaded and running | `=FSN.Range.Subsidiaries()` in Lists A2, read after it settles | `#NAME?`: Finsyte isn't loaded. Empty text: Finsyte is signed out, or signed in with its lists not loaded; ask what the Finsyte tab's Connectivity button reads. `Login`: the user signs in. `Switch Company`: the user clicks Refresh Data › Entire Workbook. `⚡Calculation paused`: Finsyte is paused, and its button in the Refresh group reads Resume Connection; the user clicks it. While Finsyte runs that button reads Pause Connection, so never send the user to Resume Connection unless a cell shows the paused text. Stop until it returns subsidiaries. |
+| Finsyte loaded and running | `=FSN.Range.Subsidiaries()` in Lists A2, read after it settles | `#NAME?`: Finsyte isn't loaded. Empty text: Finsyte is signed out, or signed in with its lists not loaded; ask what the Finsyte tab's Connectivity button reads. `Login`: the user signs in. `Switch Company`: the user clicks Refresh Data › Entire Workbook. A paused Finsyte still returns these lists, and its value cells read 0 (SKILL.md, "Verify", step 1). While Finsyte runs, its button in the Refresh group reads Pause Connection, so send the user to Resume Connection only after the user says the button reads Resume Connection. Stop until it returns subsidiaries. |
 
 Tell the user, before the first write, that you add a hidden Lists sheet to read their NetSuite lists, and that everything you add stays in this workbook. Then add Lists and run the last two checks there.
 
@@ -125,7 +125,7 @@ From the table:
 
 ## Waiting for values
 
-Finsyte fetches values in the background. A cell shows `#GETTING_DATA` (in Office.js, `values` returns the text `#GETTING_DATA` with `valueTypes` `Error`) until its value arrives, and any total over it is partial.
+Finsyte fetches values in the background. A cell shows `#GETTING_DATA` (in Office.js, `values` returns the text `#GETTING_DATA` with `valueTypes` `Error`) until its value arrives, and any total over it is partial. A paused Finsyte returns 0 in place of the values (SKILL.md, "Verify", step 1).
 
 1. Read each page's used range in blocks and count the `#GETTING_DATA` cells. Report the count to the user as it falls.
 2. Read again every 30 to 60 seconds, and keep building the next page in between when you can.
