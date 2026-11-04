@@ -37,7 +37,7 @@ Columns from K are the discovery area while you build (`references/excel-mechani
 
 ## Inputs
 
-Font Times New Roman 10 pt; B1 14 pt bold; section labels bold. A typed input is blue (`#0000FF`) on light yellow (`#FFFFCC`); a formula is black on white. Column widths: A 2.7, B 30.9, C 30.9, D 3.6, E 76.4, F 25.4, G 3, H 30.8, I 3.8, J 30.8, K 3.8, L 30.8, M 3.8, N 30.8. Gridlines off. Print area B1 to N and the last used row, landscape, one page wide.
+Font from the Normal style; B1 14 pt bold; section labels bold. A typed input is blue (`#0000FF`) on light yellow (`#FFFFCC`); a formula is black on white. Column widths: A 2.7, B 30.9, C 30.9, D 3.6, E 76.4, F 25.4, G 3, H 30.8, I 3.8, J 30.8, K 3.8, L 30.8, M 3.8, N 30.8. Gridlines off. Print area B1 to N and the last used row, landscape, one page wide.
 
 E1 holds "Return to Index", a link to `Index!A1`.
 
@@ -106,7 +106,7 @@ Each name covers exactly the rows filled. Leave out the column of a list whose p
 
 ## Cover
 
-Font Times New Roman. Gridlines off. Print area C1:H21, landscape, fit to one page, centered horizontally. Widths: A 2.7, C 8, D 26, E 48, G 26, H 8, I 14.6, R 16, S 20. Rows centered across C:H use Center Across Selection.
+Font from the Normal style. Gridlines off. Print area C1:H21, landscape, fit to one page, centered horizontally. Widths: A 2.7, C 8, D 26, E 48, G 26, H 8, I 14.6, R 16, S 20. Rows centered across C:H use Center Across Selection.
 
 | Cell | Content | Format |
 |---|---|---|
@@ -152,7 +152,7 @@ Font Times New Roman. Gridlines off. Print area C1:H21, landscape, fit to one pa
 
 ## Index
 
-Font Times New Roman. Gridlines off. Column A hidden; widths B 10, C 34, D 52, E 44, F 52, G 10. Freeze panes at row 5. Print area B1:F and the footer row, rows 1 to 4 repeated, landscape, one page wide.
+Font from the Normal style. Gridlines off. Column A hidden; widths B 10, C 34, D 52, E 44, F 52, G 10. Freeze panes at row 5. Print area B1:F and the footer row, rows 1 to 4 repeated, landscape, one page wide.
 
 | Row | Content |
 |---|---|

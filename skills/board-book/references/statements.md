@@ -278,7 +278,7 @@ Both spill across, so leave the rest of each row empty. Finsyte's Exclude Filter
 
 ## Row formats
 
-- **Font:** Times New Roman 10 pt, from the Normal style (`references/excel-mechanics.md`, "Formatting calls"). The checks block's content cells: 8 pt, color `#595959`; its header bold, color `#808080`, fill `#F2F2F2`.
+- **Font:** Times New Roman 10 pt, from the Normal style (`references/excel-mechanics.md`, "Formatting calls"). The checks block's content cells: 8 pt, color `#595959`, set row by row on the cells that hold a caption, a code or a formula, never in one call over the block; its header bold, color `#808080`, fill `#F2F2F2`.
 - **Bold:** captions, group totals, subtotals, Gross profit, Operating income, Net income, the net cash lines, Net increase in cash, Cash at end of period.
 - **Borders**, on the value and change cells of the row: a thin top border on group totals, subtotals and the bold calculated lines; a thin top and a double bottom border on Total assets, Total liabilities and equity, Net income (operations) and Cash at end of period.
 - **$ format** (`references/pages.md`, "Number formats"): the first line under each caption that starts a section, with its first detail row and its total; every row the trees above mark $. Other rows take the amount format; ratio and percent KPIs their own.
