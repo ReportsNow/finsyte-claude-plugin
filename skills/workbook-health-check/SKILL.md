@@ -99,9 +99,10 @@ Severity is High, Medium or Info. Fix mode **Confirm** means you make the fix af
 | `TOTAL_SUM` | A `SUM` whose range holds an `AGGREGATE` or `SUBTOTAL` cell together with the cells that cell totals, so the subtotal counts twice | High | Confirm |
 | `AGGREGATE_LINE_ITEM` | An `AGGREGATE` cell inside a parent `AGGREGATE(9,0,…)` range whose own range lies outside the parent's range, so the parent total leaves the line out | High | Confirm |
 | `TOTAL_OMITS_ROWS` | A total whose range stops next to more numbers in the same block | Medium | Advise: extend the range to the whole block |
-| `ACCOUNTS_MISSING` | A missing-accounts check (`FSN.Range.AccountNumbers` with the report's account range as Exclude Filter) that lists account numbers. The totals leave those accounts out. | High | Advise: the Finsyte skill's Keep reports complete |
-| `ACCOUNTS_CHECK_ABSENT` | A sheet whose FSN balance calls read a column of account numbers, with no missing-accounts check. Cash Flow sheets (an `FSN_L4_CBP` row) are left out. | Info | Confirm |
+| `ACCOUNTS_MISSING` | A missing-accounts check (`FSN.Range.AccountNumbers` with the report's account range as Exclude Filter) that lists account numbers (see "Missing-accounts checks") | High; Medium for a report whose account range holds an `FSN_` code; Info on a board book | Advise: the Finsyte skill's Keep reports complete |
+| `ACCOUNTS_CHECK_ABSENT` | A sheet whose FSN balance calls read a column of account numbers, with no missing-accounts check. Cash Flow sheets (an `FSN_L4_CBP` row) and the report pages of a board book (see "Board books") are left out. | Info | Confirm |
 | `NUMBERS_AS_TEXT` | Numbers stored as text inside a range that a `SUM`, `AGGREGATE` or `SUBTOTAL` totals. The total skips them. | Medium | Advise: select the cells, then the warning icon › Convert to Number |
+| `BOOK_CHECKS` | A board book's own checks that read Error or Review: Book checks on Inputs, column G of Index, and each page's Overall cell and check rows (see "Board books") | High for Error; Info for Review | Advise: the board-book skill's Verify |
 
 **Volatile and slow formulas**
 
@@ -182,6 +183,24 @@ Custom segments are the last arguments of 15 FSN functions: one argument per cus
 5. Segment arguments with values get advice. Segment setup is company-wide: a Finsyte administrator of the company sets up the segments in Help › Preferences › Custom Segments, and Excel restarts. For the segments of another company, the user clicks Switch Company, selects that company, and clicks Use for Custom Features; Finsyte's message then says whether Excel needs a restart. Both paths end with Refresh Data › Entire Workbook.
 6. A cell that shows a message naming a segment value that the segment does not have is an `FSN_ERROR_MESSAGE` finding.
 
+## Missing-accounts checks
+
+The Exclude Filter of `FSN.Range.AccountNumbers` removes only the accounts it names. A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, and the check still lists those accounts.
+
+- With an `FSN_` code in the report's account range, alone or in a `^` list, `ACCOUNTS_MISSING` is Medium. Name the code rows, and say that the check also lists the accounts under those codes, which the totals count. The Fix is the exclude list in the Finsyte skill's "Keep reports complete", after which the check lists only the accounts that no row counts.
+- A summary account row works the same way: a listed account that the user says sits under a summary account row is counted too.
+- A listed account that a code row or a summary account row counts gets no row of its own: the total would count the account twice.
+- On a board book, see "Board books".
+
+## Board books
+
+A board book built with the board-book skill has sheets named Inputs, Cover and Index, numbered report pages, a hidden sheet named Lists, and the workbook name `BookChecks`. Each section of its pages ends in an Other line that subtracts the lines beside it from a NetSuite rollup, so an account that NetSuite adds later still lands in the totals. Below each page's footer, a block headed `CHECKS (not printed)` holds the page's checks, with their statuses in column E and the page's Overall cell in column F of the header row.
+
+- `BOOK_CHECKS`: read `BookChecks` on Inputs, column G of Index, and the Overall cell of each page. Give one finding per page that reads Error or Review, with the check rows that read Error or Review and their values. Error is High, Review is Info. The Fix points to the board-book skill's Verify table. A page whose only Review is its missing-accounts row gets no `BOOK_CHECKS` finding: that Review goes in the page's `ACCOUNTS_MISSING` finding.
+- `ACCOUNTS_CHECK_ABSENT` leaves out the report pages: the Other lines keep them complete, and only pages 1 and 2 carry a missing-accounts check.
+- `ACCOUNTS_MISSING` on pages 1 and 2 is Info: the listed accounts sit in a group's plug row, an Other line or an Other group's `Accounts not listed` row, so the totals count them. The Fix is the board-book skill's "List a new account".
+- The hidden Lists sheet is the board book's own: leave it out of `HIDDEN_SHEETS`, and never list it for unhiding or deletion.
+
 ## Drilldown and table output
 
 Drilldown output comes in three forms:
@@ -220,6 +239,7 @@ I changed nothing. I can step through the flagged cells one at a time, and I can
 ```
 
 - One finding is one rule and one cause. Within a severity, findings follow the order of the rule tables.
+- Number the findings straight through the report: the first Medium finding takes the number after the last High one, and so on through Other.
 - Every finding has the three lines of the template: what was found, `Why it matters:` and `Fix:`.
 - A problem that fits no rule goes under "Other" as Info, with advice.
 - "Not checked" lists the rules that could not run and why, such as a protected sheet that could not be read, a rule that a workbook file cannot show, or FSN values from a session without Finsyte.
@@ -229,7 +249,7 @@ I changed nothing. I can step through the flagged cells one at a time, and I can
 
 ## Fixes
 
-Each fix follows the ground rules: its own list and yes, the old formulas kept, the edit, the tie-out. After the tie-out, run the rule again on the edited cells, report the result, and then list the next fix.
+Each fix follows the ground rules: its own list and yes, the old formulas kept, the edit, the tie-out. Start each fix's list with the finding's number and rule ID from the report. After the tie-out, run the rule again on the edited cells, report the result, and then list the next fix.
 
 | Rule ID | Fix |
 |---|---|
@@ -240,6 +260,6 @@ Each fix follows the ground rules: its own list and yes, the old formulas kept, 
 | `WHOLE_COLUMN_REFERENCE` | A range that grows with the data, in this order: a table column where the data is an Excel table; `A2:INDEX(A:A,COUNTA(A:A))` for a column with one header cell and no empty cells; a trim reference such as `A:.A`, after asking whether everyone who opens the workbook has Microsoft 365, because Excel 2021 and 2024 show `#NAME?` for a trim reference; a spill reference such as `A2#` for spilled data. A fixed range such as `$A$1:$A$2000` is no fix: it drops rows added later. For an FSN account list, use the range that holds the report's account numbers, as in the Finsyte skill's "Keep reports complete". The listed edit names the rows the new range covers. Compare the result before and after. |
 | `TOTAL_SUM` | `AGGREGATE(9,0,<the same range>)` (the Finsyte skill's Formula conventions). `AGGREGATE` leaves out every `AGGREGATE` and `SUBTOTAL` cell in its range, so first fix a line item in the range that is itself an `AGGREGATE` (`AGGREGATE_LINE_ITEM`). The listed edit names the subtotals that the total stops counting twice. |
 | `AGGREGATE_LINE_ITEM` | The line written with `+` over its cells, such as `=G5+G6+G7+G8` |
-| `ACCOUNTS_CHECK_ABSENT` | The check formula and its flag from the Finsyte skill's "Keep reports complete", in empty cells below the report |
+| `ACCOUNTS_CHECK_ABSENT` | The check formula and its flag from the Finsyte skill's "Keep reports complete", in empty cells below the report, with that section's exclude list for rows that hold a code or a summary account |
 | `RUNNING_TOTAL` | The first total as `=A2`, and each later total as the previous total plus the current value with `SUM`, such as `=SUM(B2,A3)`. `SUM` skips a text cell, where `=B2+A3` returns `#VALUE!`. |
 | `NAMES_BROKEN` | Delete each name after confirming that no formula, name, conditional format, data validation or chart uses the name |
