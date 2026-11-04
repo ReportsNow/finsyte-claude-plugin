@@ -27,8 +27,9 @@ A hidden sheet named `Lists`. Row 1 holds headings; each list spills down from r
 | G | Departments | `=FSN.Range.Departments(,,Subsidiary,FALSE)` | `ListDepartments` |
 | H | Classes | `=FSN.Range.Classifications(,,Subsidiary,FALSE)` | `ListClasses` |
 | I | Locations | `=FSN.Range.Locations(,,Subsidiary,FALSE)` | `ListLocations` |
+| J | Periods | `=SEQUENCE(PeriodsPerYear)` | `ListPeriods` |
 
-Each name refers to the spill, such as `=Lists!$A$2#`. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
+Each name refers to the spill, such as `=Lists!$A$2#`. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it; column J reads the periods per year, so write it after Inputs C34 holds them. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
 
 Columns from K are the discovery area while you build (`references/excel-mechanics.md`, "Discovery"). Clear it when the book is built.
 
@@ -53,7 +54,7 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 11 | Current fiscal year | Typed, such as `FY 2025` | `CurFY` | `ListFiscalYears` |
 | 12 | Prior year | `=C10-1`, format `0` | `PriorYear` | |
 | 13 | Prior fiscal year | `=IFERROR(INDEX(ListFiscalYears,MATCH(C11,ListFiscalYears,0)+1),"")` | `PriorFY` | |
-| 14 | Period | Typed number | `Period` | Whole number from 1 to `=C34` |
+| 14 | Period | Typed number | `Period` | `ListPeriods` |
 | 15 | Quarter | `=ROUNDUP(C14/3,0)` | `Quarter` | |
 | 16 | Prior quarter-end period | `=IF(C15=1,C34,(C15-1)*3)` | `PriorQtrPeriod` | |
 | 17 | Period end date | `=FSN.PeriodToDate(C11,C14)`, format `mmmm d, yyyy` | `PeriodEnd` | |

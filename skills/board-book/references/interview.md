@@ -1,14 +1,14 @@
 # Interview
 
-Read this before you ask the user anything. The interview runs in four rounds, then a build plan the user confirms. Every question offers the values Finsyte returned (`references/excel-mechanics.md`, "Discovery") and a recommended default, so the user can answer "defaults".
+Read this before you ask the user anything. The interview asks its questions one at a time, in four rounds of topics, then shows a build plan the user confirms. Every question offers the values Finsyte returned (`references/excel-mechanics.md`, "Discovery") and a recommended default.
 
 ## Rules
 
-1. **One round per message.** Number the questions, at most five a round, each with its options and the recommended default marked. Use a question tool if your environment has one; otherwise ask in the chat.
+1. **One question per message.** Ask one question, wait for the answer, then ask the next. Never put two questions in one message, even when your question tool takes several. Start each question with where it falls, such as "Contents, 2 of 4", counting only the questions that apply, and give its options with the recommended one marked. Use a question tool if your environment has one; otherwise ask in the chat.
 2. **A pick from a list is a checklist.** The subsidiary columns, the department, class and location columns, the intercompany accounts and entity names, and the depreciation and amortization accounts are each one multi-select question: one checkbox per value, by its full name, with the recommended values checked. Never offer a count or a preset in place of the names, such as "All 8 members" or "Members without the elimination subsidiary". When your question tool has no multi-select, or holds fewer options than the list has values, write the list in the chat as numbered lines, `☑` for recommended and `☐` for not, and take a reply such as "all", "all but 6" or "1-5, 9". An answer that leaves a pick to the user, such as "I'll pick the classes", gets that checklist in your next message, before the next question.
 3. **Ask only what changes the book.** When discovery leaves one option, such as one accounting book, state it in the plan and don't ask.
 4. **Offer only real values.** Every subsidiary, fiscal year, budget category, member and account you offer is one Finsyte returned. Show accounts as number and name.
-5. **"Defaults"** answers a round with the recommended defaults: list what that set. Round 1 always needs the user's own answer for the subsidiary and the period: a wrong default there builds the wrong book.
+5. **"Defaults"** answers the current question with its recommended default, and "defaults for the rest" answers every question left: list what that set, then show the plan. Round 1 always needs the user's own answer for the subsidiary and the period: a wrong default there builds the wrong book.
 6. **A changed answer reruns what depends on it.** A new subsidiary reruns the segment and chart of accounts discovery and the rounds after round 1.
 7. **Nothing is built before the plan's yes.** Discovery writes the Lists sheet, and after round 1 the Inputs cells it needs (C5, C11, C14 and their names). No report page is written before the user replies to the plan with a yes. A request to "just build it" still gets round 1 and the plan.
 
@@ -29,7 +29,7 @@ After the answers, write Inputs C5, C11 and C14 with their names, then the rest 
 
 ## Round 2: contents
 
-Show the page groups the account can have, each with what discovery found, then ask:
+With the first question, list the page groups the account can have, each with what discovery found, in a few lines. Then one question per group that applies:
 
 | Group | Offer it when | Questions |
 |---|---|---|
@@ -43,7 +43,7 @@ Show the page groups the account can have, each with what discovery found, then 
 
 ## Round 3: lines
 
-Draft the line plan (`references/statements.md`, "The line plan") and show it in short form: one line per statement line, with its accounts as number ranges and names, such as "Accounts receivable, net: 1100 to 1140 (5 accounts)". Show the balance sheet and operations lines; say the cash flow follows them. Then ask only what applies:
+Draft the line plan (`references/statements.md`, "The line plan") and show it in short form with the first question: one line per statement line, with its accounts as number ranges and names, such as "Accounts receivable, net: 1100 to 1140 (5 accounts)". Show the balance sheet and operations lines; say the cash flow follows them. Then ask only the questions that apply, one at a time:
 
 1. **Undeposited Funds** (when the account exists): count it as cash? Recommend yes: NetSuite's statement of cash flows and Finsyte's Cash Flow template treat it as cash. With no, it is an other current asset.
 2. **Intercompany** (when discovery found balance sheet candidates): are these the intercompany accounts, and which entity names appear on intercompany transactions? Offer the entities discovery found for each member (`references/excel-mechanics.md`, "Intercompany entity names"). Explain that Due from (to) affiliates shows one line per entity and that "Other entities" holds whatever doesn't match a name. Without names, or if the user prefers, Due from (to) affiliates lists the intercompany accounts instead, one row per account. Intercompany revenue, cost and expense accounts stay on the operations lines.
@@ -57,7 +57,7 @@ Apply edits and show again only the sections that changed.
 
 ## Round 4: cover and presentation
 
-One message, with defaults:
+One question at a time, each with its default:
 
 1. Company name on the cover and every page. Default: the subsidiary's legal name.
 2. Prepared by. Default: empty.

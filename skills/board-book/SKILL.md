@@ -38,7 +38,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 
 | Thought | Reality |
 |---|---|
-| "The user wants it fast, so I'll skip the questions." | Round 1 and the plan always run. "Defaults" answers the other rounds in one word. |
+| "The user wants it fast, so I'll skip the questions." | Round 1 and the plan always run. "Defaults for the rest" answers every question after round 1 in one reply. |
 | "Cash is usually 1000 and revenue 4000." | Read the chart of accounts. Numbers differ by company, and a wrong one returns "Invalid account number". |
 | "`TODAY()` gives the default period." | Discovery types last month's end date in a scratch cell. Inputs holds typed values. |
 | "`CELL("filename")` gives the page number." | `CELL` is volatile. Type the page number. |
@@ -95,7 +95,7 @@ Review
 
 Not in this book: <page groups left out, and why>.
 
-To roll forward: change Current fiscal year and Period on Inputs, wait for the values, and check Book checks.
+To roll forward: pick Current fiscal year and Period from their dropdowns on Inputs, wait for the values, and check Book checks. The other dropdowns on Inputs (subsidiary, accounting book, currency, budget category and the column lists) re-point every page the same way.
 ```
 
 Then the one optional manual step: Office.js puts each outline button below its group; Data › Outline › clear "Summary rows below detail" moves the buttons to the header rows.
@@ -104,7 +104,7 @@ Then the one optional manual step: Office.js puts each outline button below its 
 
 Read the pages before you change them: the line plan is on Inputs (E3 down) and in the rows of any page of the statement.
 
-- **Roll forward.** Change Current fiscal year and Period on Inputs, and nothing else. Wait for values, then read Book checks. Never rebuild for a new period.
+- **Roll forward.** Pick Current fiscal year and Period from their dropdowns on Inputs, and change nothing else. Wait for values, then read Book checks. Never rebuild for a new period.
 - **List a new account.** Insert a row inside the group, between its first and last detail rows, so the group's ranges grow; copy the formulas of the detail row above; type the account in B. Do it on every page of that statement and on the matching cash flow line. A group plug row's `SUM` range grows with the insert; in a group with sub-groups, where the plug row subtracts rows by name, add the new row to its subtraction. The section's Other line subtracts the group's total, so the account leaves the Other line by itself. An account in an Other group's `Accounts not listed` row is listed the same way, as a detail row of that Other group or of another group.
 - **Change a column's member.** Change the entry on Inputs (H, J, L or N). Adding or removing a column: copy a member column, or delete one, on every page of that group, resize the list's name on Inputs, and update the sum checks.
 - **Add a page or a page group.** Build it from `references/pages.md` with the existing Inputs and line plan, insert it in page order, renumber the sheets after it, and update the Index, its links and `BookChecks`.
