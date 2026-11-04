@@ -236,20 +236,14 @@ A report with a fixed list of account rows goes stale silently. A GL account add
 =FSN.Range.AccountNumbers($B$6, $B$21:$B$216, $B$2,,,,,,TRUE)
 ```
 
-- **Include Filter:** the report's statement code in a parameter cell: `FSN_L0_BAL` or `FSN_L0_INC`.
-- **Exclude Filter:** the range that holds the report's account numbers. It removes only the accounts it names, so rows that hold a code or a summary account need their account lists added (below).
+- **Include Filter:** the report's statement code in a parameter cell: `FSN_L0_BAL` or `FSN_L0_INC`. A report with code rows or summary account rows narrows it (below).
+- **Exclude Filter:** the range that holds the report's account numbers. It removes only the accounts it names.
 - **Subsidiary:** the report's Subsidiary cell.
 - **Posting Only**, the last argument: TRUE for a report that lists posting accounts only, including the plain Trial Balance templates. Leave it blank when the report lists summary accounts too, as the other templates do, or every summary account shows as missing.
 
 The check doesn't suit the Cash Flow templates, which leave out Bank accounts and Undeposited Funds by design.
 
-**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, and the check still lists those accounts. Give each such row its account list, spilled across in an empty column to the right of the report, such as `=FSN.Range.AccountNumbers($B$40,,,,,,,TRUE)` in `AB40` for the code in `B40`. Join the lists with the report's account range in one cell, such as `AB219`:
-
-```
-=TEXTSPLIT(TEXTJOIN("^",TRUE,$B$21:$B$216,$AB$40#),"^")
-```
-
-The check then reads that cell's spill as its Exclude Filter: `=FSN.Range.AccountNumbers($B$6, $AB$219#, $B$2,,,,,,TRUE)`.
+**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, the accounts NetSuite adds later included, so those accounts need no check. The Exclude Filter removes only the accounts it names, so a check that includes them lists them all. Put in the Include Filter cell only the parts of the chart the report lists account by account: the codes of those types, or the parent accounts of those accounts, joined with `^`. On a P&L whose revenue lists its accounts and whose cost of sales and operating expenses are code rows, the Include Filter cell holds `FSN_L3_INC`.
 
 It returns one blank cell when nothing is missing and spills the missing account numbers otherwise. Put a flag beside it (here the check is in `$Z$220`):
 

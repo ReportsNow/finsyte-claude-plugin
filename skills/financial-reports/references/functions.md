@@ -249,7 +249,7 @@ The Include and Exclude filters of every Range function accept:
 
 A cell range or named range also works, and each cell in it can hold any of these patterns.
 
-The Exclude Filter removes only the values it names. Include Children adds the accounts under an Include Filter match only, so a code or a summary account in the Exclude Filter leaves the accounts under it in the result. To leave those accounts out, put their own list in the Exclude Filter (*Keep reports complete*).
+The Exclude Filter removes only the values it names. Include Children adds the accounts under an Include Filter match only, so a code or a summary account in the Exclude Filter leaves the accounts under it in the result. To leave those accounts out, keep them out of the Include Filter (*Keep reports complete*).
 
 ### FSN.Range.AccountNumbers, FSN.Range.Accounts
 
