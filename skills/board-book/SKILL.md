@@ -89,7 +89,7 @@ Then go on in the order of step 7 from the first thing missing: the next page, o
 | Effect of exchange rates within materiality | A balance sheet line missing from the cash flow tree; a wrong sign | Real translation effects; accounts the line plan left out of the cash flow. On segment pages it reads the Total columns only. |
 | Sum of months less total | A month column with the wrong period or range | Never |
 | Sum of subsidiaries or segment columns less total (Review) | A column with the wrong parameter | Overlapping `(Hierarchy)` members; subsidiaries left out of the consolidating columns, such as one on another fiscal calendar; inactive segment values that still hold balances |
-| Accounts not listed on this page (Review) | A body account missing from the exclude list | New or unlisted accounts, now in a group's plug row or an Other line |
+| Accounts not listed on this page (Review) | A body account missing from column B | New or unlisted accounts, now in a group's plug row or an Other line |
 
 4. **Tie across pages.** Net income on page 2 (year column) equals net income on pages 1 and 3 (year column), and cash at end of period on page 3 equals cash on page 1. The month and cumulative pages agree with page 2 and page 3 at the book's period.
 5. **Against NetSuite.** Ask the user to compare total assets and net income for the period with NetSuite's own balance sheet and income statement: the checks prove the book ties to Finsyte's rollups, and this proves the parameters are the ones the user meant.
@@ -146,6 +146,6 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 | Accounts without numbers, or with `-`, `^`, `*` or `?` in the number | Use `id_<internal id>` in B. |
 | Account numbers with leading zeros | Column B is text, set before the values are written. |
 | Summary accounts | Never detail rows: their posting children are. A posting parent is a detail row of its own. |
-| Inactive accounts with balances | Not listed as detail; their balances land in the group plug rows through the rollup lists, which include inactive accounts. |
+| Inactive accounts with balances | Not listed as detail; their balances land in the group plug rows and Other lines through the rollup codes, which include inactive accounts. |
 | Finsyte paused or signed out during the build | Paused: value cells read 0, and the button in Finsyte's Refresh group reads Resume Connection; the user clicks it. Signed out: value cells show empty text, the cells with a leading minus show `#VALUE!`, and the Finsyte tab's Connectivity button reads Login; the user signs in. Then Refresh Data › Entire Workbook, and verify only after the values return. |
 | The user stops the build | Leave what is built, list what is missing, and offer to finish or to delete the book's sheets and names. |

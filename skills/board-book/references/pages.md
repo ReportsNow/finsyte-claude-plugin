@@ -57,12 +57,12 @@ Every report page has this frame. Page 1 has one more heading row, so its body s
 | Column | Holds | Shown |
 |---|---|---|
 | A | Level: `=FSN.GetListInfo($B$20,$B<r>,$A$20)` on rows with an account or code in B, `1` on every other body row. Every body row has a value in A: the band and the collapsed-group formulas count the visible cells of A. | Hidden |
-| B | The row's account number, `id_<internal id>` for an account without a number, an `FSN_` code, or several accounts joined with `^`. Text format (`@`). | Hidden |
+| B | The row's account number, `id_<internal id>` for an account without a number, an `FSN_` code, or several codes and accounts joined with `^`. Text format (`@`). | Hidden |
 | C | Caption. D and E stay empty in the body so captions run across them. | Shown |
 | E | Below the footer: each check's status. | Not printed |
 | F onward | Value columns, change columns and narrow spacer columns, as each page lists. | Shown |
 
-The print area runs from C1 to the page's last spacer column and down to the footer row. The column after the print area holds "Return to Index" in row 1, a link to `Index!A1`. Account lists that spill across (see `references/statements.md`, "Rollup rows") start in the column after that, with "Account lists incl. children (not printed)" in row 21.
+The print area runs from C1 to the page's last spacer column and down to the footer row. The column after the print area holds "Return to Index" in row 1, a link to `Index!A1`.
 
 Widths: A 3.6, B 10, C 14.6, D 14.6, E 10.3, value and change columns 14.6, spacer columns 1.4.
 
@@ -97,7 +97,6 @@ Titles C1 to C4 are centered across the print width (Center Across Selection, no
 |---|---|
 | Actual | `=FSN.GLAccountBalance(<c>$6,<c>$7,<c>$8,<c>$9,$B<r>,<c>$10,<c>$11,<c>$12,<c>$13,<c>$14,<c>$15,<c>$16,<c>$17,<c>$18)` |
 | Actual, balance range | The Actual formula with `<c>$19` in place of `<c>$9`. Used where `references/statements.md` says "balance range". |
-| Actual, account list | The Actual formula with the row's list spill, such as `$W<r>#`, in place of `$B<r>`. |
 | Budget | `=FSN.BudgetAccountBalance(<c>$6,<c>$7,<c>$8,<c>$9,$B<r>,<c>$19,<c>$10,<c>$11,<c>$12,<c>$13,<c>$14,<c>$15)`, never negated |
 
 Change columns are arithmetic on the value cells of the same row. `% Change` and `% Variance` cells read `=IFERROR(<difference>/ABS(<base>),0)`.
