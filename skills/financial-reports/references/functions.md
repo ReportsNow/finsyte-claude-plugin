@@ -244,9 +244,11 @@ The Include and Exclude filters of every Range function accept:
 | `-` | `1000-2000` | A range of values |
 | `?` | `10?0` | Any single character |
 | `*` | `1*` | Anything starting with 1 |
-| An `FSN_` code | `FSN_L3_BNK` | That rollup, and the accounts under it when Include Children is TRUE |
+| An `FSN_` code | `FSN_L3_BNK` | In the Include Filter, that rollup, plus the accounts under it with Include Children TRUE. In the Exclude Filter, the rollup entry only |
 
 A cell range or named range also works, and each cell in it can hold any of these patterns.
+
+The Exclude Filter removes only the values it names. Include Children adds the accounts under an Include Filter match only, so a code or a summary account in the Exclude Filter leaves the accounts under it in the result. To leave those accounts out, put their own list in the Exclude Filter (*Keep reports complete*).
 
 ### FSN.Range.AccountNumbers, FSN.Range.Accounts
 

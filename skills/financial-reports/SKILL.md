@@ -237,11 +237,19 @@ A report with a fixed list of account rows goes stale silently. A GL account add
 ```
 
 - **Include Filter:** the report's statement code in a parameter cell: `FSN_L0_BAL` or `FSN_L0_INC`.
-- **Exclude Filter:** the range that holds the report's account numbers.
+- **Exclude Filter:** the range that holds the report's account numbers. It removes only the accounts it names, so rows that hold a code or a summary account need their account lists added (below).
 - **Subsidiary:** the report's Subsidiary cell.
 - **Posting Only**, the last argument: TRUE for a report that lists posting accounts only, including the plain Trial Balance templates. Leave it blank when the report lists summary accounts too, as the other templates do, or every summary account shows as missing.
 
 The check doesn't suit the Cash Flow templates, which leave out Bank accounts and Undeposited Funds by design.
+
+**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, and the check still lists those accounts. Give each such row its account list, spilled across in an empty column to the right of the report, such as `=FSN.Range.AccountNumbers($B$40,,,,,,,TRUE)` in `AB40` for the code in `B40`. Join the lists with the report's account range in one cell, such as `AB219`:
+
+```
+=TEXTSPLIT(TEXTJOIN("^",TRUE,$B$21:$B$216,$AB$40#),"^")
+```
+
+The check then reads that cell's spill as its Exclude Filter: `=FSN.Range.AccountNumbers($B$6, $AB$219#, $B$2,,,,,,TRUE)`.
 
 It returns one blank cell when nothing is missing and spills the missing account numbers otherwise. Put a flag beside it (here the check is in `$Z$220`):
 
@@ -249,7 +257,7 @@ It returns one blank cell when nothing is missing and spills the missing account
 =IF(COUNTA($Z$220#)=COUNTBLANK($Z$220#), "✓ All accounts present", "⚠ Missing accounts — see below")
 ```
 
-`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula.
+`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula. An account that a code row or a summary account row counts gets no row of its own: the total would count the account twice.
 
 ---
 
