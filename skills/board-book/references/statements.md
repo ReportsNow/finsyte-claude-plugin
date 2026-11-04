@@ -164,7 +164,7 @@ Pages 2, 6, 7, 8, 12, 15, 18, 21 and 23 to 26. Indents: captions 0, lines 1, sub
 | Other operating expenses | Plug | [`FSN_L3_EXP` list] − (the expense groups, the single expense lines, Depreciation and amortization) | |
 | Total operating expenses | Subtotal | From the first expense line | Bold, top border |
 | Operating income | Calculated, dynamic | Gross profit − Total operating expenses | `Operating income / Operating loss / Operating income (loss)`. Bold, $ |
-| Other income (expense), net | Calculated, dynamic | [`FSN_L3_OIN` list, reversed] − [`FSN_L3_OEX` list]. B: `FSN_L3_OIN^FSN_L3_OEX`, so the missing-accounts check counts these accounts as placed. | `Other income, net / Other expense, net / Other income (expense), net` |
+| Other income (expense), net | Calculated, dynamic | [`FSN_L3_OIN` list, reversed] − [`FSN_L3_OEX` list]. B: `FSN_L3_OIN^FSN_L3_OEX`. The missing-accounts check reads these accounts from the two rollup rows' lists ("Missing accounts"). | `Other income, net / Other expense, net / Other income (expense), net` |
 | Net income | Dynamic | `=AGGREGATE(9,0,<Operating income>:<Other income (expense), net>)` | `Net income / Net loss / Net income (loss)`. Bold, top and double bottom border, $ |
 | (blank) | Blank | | |
 | `Key performance indicators:` | Caption | | |
@@ -269,10 +269,10 @@ Every row of the block below the header is hidden at outline level 1. `<last col
 
 | Row | B | C | E | F |
 |---|---|---|---|---|
-| Exclude list | | `Accounts on this page (exclude list)` | | `=TRANSPOSE(FILTER($B$<first>:$B$<last>,$B$<first>:$B$<last><>""))`, the body rows |
+| Exclude list | | `Accounts on this page (exclude list)` | | `=TEXTSPLIT(TEXTJOIN("^",TRUE,$B$<first>:$B$<last><lists>),"^")`, the body rows; on an operations page `<lists>` is `,$<list column><OIN>#,$<list column><OEX>#`, the lists of the `FSN_L3_OIN` and `FSN_L3_OEX` rollup rows, and on a balance sheet page it is empty |
 | Missing | `FSN_L0_BAL` (`BS-MQY`) or `FSN_L0_INC` (`IS-MQY`) | the check caption | `=IFERROR(IF(COUNTA(F<r>#)=COUNTBLANK(F<r>#),"OK","Review"),"Error")` | `=FSN.Range.AccountNumbers($B<r>,$F$<exclude list>#,Subsidiary,,TRUE,FALSE,FALSE,TRUE,TRUE)` |
 
-Both spill across, so leave the rest of each row empty. The exclude list keeps the codes in B, so a group of a whole type or parent counts every account under it as placed, new ones in its plug row included. What the check lists are accounts no row names: accounts NetSuite added after the build, which sit in a plug line or an Other group's `Accounts not listed` row, and accounts the line plan missed. A new build passes: every account the plug lines hold is a detail row of an Other group. The totals are right either way, so the status is Review. Tell the user which accounts are listed, and offer to add them to a line.
+Both spill across, so leave the rest of each row empty. Finsyte's Exclude Filter matches account numbers, ranges, wildcards and `id_` values; a code such as `FSN_L3_BNK` matches no account there. So the exclude list names accounts: the accounts in B of the body rows, and the accounts of Other income (expense), net, the one line that holds its accounts by code alone. What the check lists are accounts no row names: accounts NetSuite added after the build, which sit in a group's plug row, a plug line or an Other group's `Accounts not listed` row, and accounts the line plan missed. A new build passes: every account is a detail row, in Other income (expense), net, or named in Other equity's B. The totals are right either way, so the status is Review. Tell the user which accounts are listed, and offer to add them to a line.
 
 ---
 
