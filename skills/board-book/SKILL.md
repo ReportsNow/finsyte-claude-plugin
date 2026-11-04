@@ -27,7 +27,7 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 
 ## Ground rules
 
-1. **Questions, then a plan, then the build.** Run the interview (`references/interview.md`). No report page is written before the user answers the plan with a yes.
+1. **Questions, then a plan, then the build.** Run the interview (`references/interview.md`): one question per message, then wait for the answer. Never send a round of numbered questions. No report page is written before the user answers the plan with a yes.
 2. **Every NetSuite value comes from Finsyte.** Each subsidiary, fiscal year, account, member and budget category in the book is one that a Finsyte formula returned in discovery. Never type an account number from memory or by analogy.
 3. **A new workbook.** Build in a blank workbook. Never build over a board book, and never into a workbook whose sheet or workbook names clash (`references/excel-mechanics.md`, "Before you start").
 4. **The Finsyte formula conventions hold everywhere.** One Finsyte call per cell, with nothing around it but a leading minus; every parameter in a cell, read from Inputs; Subsidiary always filled; totals as `AGGREGATE(9,0,…)`; no volatile function in any cell a Finsyte call reads (no `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `RAND`). The front pages' own label formulas are the one place `TEXT` and `CHOOSE` wrap dates.
@@ -39,6 +39,8 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 | Thought | Reality |
 |---|---|
 | "The user wants it fast, so I'll skip the questions." | Round 1 and the plan always run. "Defaults for the rest" answers every question after round 1 in one reply. |
+| "Asking the whole round in one message is quicker." | Users miss and mix up answers in a list of five. One question, then wait. |
+| "This segment has too many values; I'll suggest leaving it out." | Show the checklist anyway, and say how wide the checked columns print. The user unchecks values to narrow it; unchecked values go to All Other. |
 | "Cash is usually 1000 and revenue 4000." | Read the chart of accounts. Numbers differ by company, and a wrong one returns "Invalid account number". |
 | "`TODAY()` gives the default period." | Discovery types last month's end date in a scratch cell. Inputs holds typed values. |
 | "`CELL("filename")` gives the page number." | `CELL` is volatile. Type the page number. |
@@ -142,5 +144,5 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 | Account numbers with leading zeros | Column B is text, set before the values are written. |
 | Summary accounts | Never detail rows: their posting children are. A posting parent is a detail row of its own. |
 | Inactive accounts with balances | Not listed as detail; their balances land in the group plug rows through the rollup lists, which include inactive accounts. |
-| Finsyte paused or signed out during the build | Values read 0 or empty. Stop waiting, tell the user, and verify only after they sign in or click Resume Connection. |
+| Finsyte paused or signed out during the build | Cells read `⚡Calculation paused` (paused) or empty text (signed out). Stop waiting and tell the user what to click, as in `references/excel-mechanics.md`, "Before you start": Resume Connection only for the paused text, Login when signed out, otherwise Refresh Data › Entire Workbook. Verify only after the values return. |
 | The user stops the build | Leave what is built, list what is missing, and offer to finish or to delete the book's sheets and names. |
