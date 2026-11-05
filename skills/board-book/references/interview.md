@@ -46,10 +46,11 @@ With the first question, list the page groups the account can have, each with wh
 Draft the line plan (`references/statements.md`, "The line plan") and show it in short form with the first question: one line per statement line, with its accounts as number ranges and names, such as "Accounts receivable, net: 1100 to 1140 (5 accounts)". Show the balance sheet and operations lines; say the cash flow follows them. Then ask only the questions that apply, one at a time:
 
 1. **Undeposited Funds** (when the account exists): count it as cash? Recommend yes: NetSuite's statement of cash flows and Finsyte's Cash Flow template treat it as cash. With no, it is an other current asset.
-2. **Intercompany** (when discovery found balance sheet candidates): are these the intercompany accounts, and which entity names appear on intercompany transactions? Offer the entities discovery found for each member (`references/excel-mechanics.md`, "Intercompany entity names"). Explain that Due from (to) affiliates shows one line per entity and that "Other entities" holds whatever doesn't match a name. Without names, or if the user prefers, Due from (to) affiliates lists the intercompany accounts instead, one row per account. Intercompany revenue, cost and expense accounts stay on the operations lines.
-3. **Depreciation and amortization**: are these the accounts? With none found, ask whether the company has any.
-4. **Distributions** (when equity accounts look like distributions, dividends or drawings): show them as a financing line?
-5. **Wording and grouping**: the caption of each operating expense group (default: the NetSuite parent's name in sentence case, such as "Selling and marketing" for "Selling Expenses"), and any lines to combine. A section with more than eight lines: propose keeping the largest and folding the rest into its Other line.
+2. **Intercompany accounts** (when discovery found balance sheet candidates): are these the intercompany accounts? Intercompany revenue, cost and expense accounts stay on the operations lines.
+3. **Intercompany entity names** (after the accounts, as its own question): which entity names appear on intercompany transactions? Offer the entities discovery found for each member (`references/excel-mechanics.md`, "Intercompany entity names"). Explain that Due from (to) affiliates shows one line per entity and that "Other entities" holds whatever doesn't match a name. Without names, or if the user prefers, Due from (to) affiliates lists the intercompany accounts instead, one row per account.
+4. **Depreciation and amortization**: are these the accounts? With none found, ask whether the company has any.
+5. **Distributions** (when equity accounts look like distributions, dividends or drawings): show them as a financing line?
+6. **Wording and grouping**: the caption of each operating expense group (default: the NetSuite parent's name in sentence case, such as "Selling and marketing" for "Selling Expenses"), and any lines to combine. A section with more than eight lines: propose keeping the largest and folding the rest into its Other line.
 
 Apply edits and show again only the sections that changed.
 
