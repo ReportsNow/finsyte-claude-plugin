@@ -74,7 +74,7 @@ Widths: A 3.6, B 10, C 14.6, D 14.6, E 10.3, value and change columns 14.6, spac
 | 2 | C2 title (12 pt bold, color `#156082`) |
 | 3 | C3 layout (12 pt bold, color `#156082`) |
 | 4 | C4 `=CovPElong` (14 pt bold) |
-| 5 | C5 `=TEXT(RefreshTime,"mmmm d, yyyy h:mm AM/PM")` on the left, and `Page <n>` typed right-aligned in the last value or change column before the final spacer (9 pt italic, color `#156082`, thin bottom border across the print width, row height 24). Type the page number: a formula that reads the sheet name uses `CELL`, which is volatile. |
+| 5 | C5 `=CovRefresh` on the left, and `Page <n>` typed right-aligned in the last value or change column before the final spacer (9 pt italic, color `#156082`, thin bottom border across the print width, row height 24). Type the page number: a formula that reads the sheet name uses `CELL`, which is volatile. |
 | 6 to 19 | The parameter block, hidden. C6 "Parameters (not printed)". The labels in E, one per row: 6 Subsidiary, 7 Fiscal year, 8 Period, 9 Period range, 10 Book, 11 Item, 12 Class, 13 Department, 14 Location, 15 Entity, 16 Transaction type, 17 Posted, 18 Currency, 19 Balance range (balance sheet and cash flow pages) or Budget category (budget pages; empty on other operations pages). |
 | 20 | A20 `Level`, B20 `GL Accounts` (the list name and property the Level formulas read). From F: the first heading row. |
 | 21 | Second heading row. |
@@ -162,7 +162,7 @@ Page 2's columns and headings, with Range `=RangeMTD` in F and G, `=RangeQTD` in
 
 ## Pages 4 to 10: trend analysis
 
-`N` is `PeriodsPerYear`. The month columns run from F for N columns (F to Q for 12 periods). Each month column's Period cell holds its period number, typed. Every month heading in row 21 is `=FSN.PeriodToDate(<c>$7,<c>$8)` with the number format `mmmm`, so the heading follows the company's fiscal calendar. Below, the column letters are those of a 12-period year; with 13 periods every column after the months moves one to the right.
+`N` is `PeriodsPerYear`. The month columns run from F for N columns (F to Q for 12 periods). Each month column's Period cell holds its period number, typed. Every month heading in row 21 is `=INDEX(MonthNames,MONTH(FSN.PeriodToDate(<c>$7,<c>$8)))`, the name of the month the column's fiscal period ends in, so the heading follows the company's fiscal calendar. `DATE(<year>,<period>,1)` gives the calendar month instead: in a July to June year it puts January over July. Below, the column letters are those of a 12-period year; with 13 periods every column after the months moves one to the right.
 
 `INDEX($F<r>:$Q<r>,Period)` is the month column at the book's period.
 

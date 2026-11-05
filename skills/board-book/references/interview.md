@@ -21,7 +21,7 @@ After Lists A to F settle.
 1. **Subsidiary.** The list from `ListSubsidiaries`. Default: the top `(Consolidated)` entry, the one whose subsidiary has no parent; the only subsidiary when there is one.
 2. **Fiscal year and period.** Default: the period that holds the last day of last month. Show its end date, such as "FY 2025, period 12 (December 31, 2025)". A board book is tied to a close, so the book holds these as fixed values: changing them on Inputs moves the whole book.
 3. **Accounting book.** Only with more than one book. Default: the first in the list, the primary book.
-4. **Reporting currency.** Only when the subsidiary tree holds more than one currency. Default: the subsidiary's own currency (`FSN.CurrencyName`). Every page reports in this currency.
+4. **Reporting currency.** Only when the subsidiary tree holds more than one currency. Default: the subsidiary's own currency, with `=FSN.CurrencyName(Subsidiary)` in Inputs C8, so the currency follows the subsidiary. Every page reports in this currency. Another pick is typed in C8, and the reply says that the budget columns stay in the subsidiary's currency: `FSN.BudgetAccountBalance` has no currency argument.
 
 After the answers, write Inputs C5, C11 and C14 with their names, then the rest of the discovery. If discovery finds an adjustment period with year-end entries (`references/excel-mechanics.md`, "Periods per year"), tell the user the amount and that the book reports regular periods, so period `<PeriodsPerYear>` leaves those entries out; ask whether to note that in the footer text.
 

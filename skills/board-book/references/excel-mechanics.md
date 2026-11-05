@@ -82,6 +82,8 @@ From the table:
 
 **Values and formulas.** Write each block as one 2-D array through `range.formulas`, with typed values in the same array. Keep each request well under 5 MB: about 2,000 rows by 25 columns. Call `context.application.suspendApiCalculationUntilNextSync()` before each write batch, so Excel calculates once per batch.
 
+**English formulas.** Office.js reads `formulas`, `numberFormat`, and the formulas of conditional formats and data validation in English, with commas between arguments, in every Excel language. The `*Local` properties (`formulasLocal`, `numberFormatLocal`, `formulaLocal`) use the user's language: never set them. Inside a formula, `TEXT` still reads its date codes in the user's language, so date labels take their month names from `MonthNames` (`references/front-pages.md`, "Cover").
+
 **Text cells first.** Set `numberFormat` to `@` on column B of the body and on any cell that holds an account number, and sync, before you write the values: an account such as `0100` keeps its zero, and `1000` stays text. Never write a formula into a cell formatted as text: Excel stores it as text. A cell that holds a formula gets `General` (or its number format) first.
 
 **Spills.** Write a spilling formula in its anchor cell only, and keep the cells it spills into empty. A `#SPILL!` means something is in the way.

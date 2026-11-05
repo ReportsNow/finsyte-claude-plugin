@@ -48,7 +48,7 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 5 | Subsidiary | Typed | `Subsidiary` | `ListSubsidiaries` |
 | 6 | Scope | `=IF(ISNUMBER(SEARCH("(Consolidated)",C5)),"Consolidated","Subsidiary")` | `Scope` | |
 | 7 | Accounting book | Typed | `Book` | `ListBooks` |
-| 8 | Reporting currency | Typed | `ReportCurrency` | `ListCurrencies` |
+| 8 | Reporting currency | `=FSN.CurrencyName(Subsidiary)`, colored as a typed input: it follows the subsidiary until the user picks another currency from the dropdown | `ReportCurrency` | `ListCurrencies` |
 | 9 | **Periods** | | | |
 | 10 | Current year | `=YEAR(C17)`, format `0` | `CurYear` | |
 | 11 | Current fiscal year | Typed, such as `FY 2025` | `CurFY` | `ListFiscalYears` |
@@ -119,7 +119,7 @@ Font from the Normal style. Gridlines off. Print area C1:H21, landscape, fit to 
 | D13, E13 | `Distribution`, typed (default `Board of Directors`) | |
 | D14, E14 | `Reporting period`, `=CovPElong` | |
 | D15, E15 | `Accounting book`, `=Book` | |
-| D16, E16 | `Last data refresh`, `=TEXT(RefreshTime,"mmmm d, yyyy")&" at "&TEXT(RefreshTime,"h:mm AM/PM")` | |
+| D16, E16 | `Last data refresh`, `=CovRefresh` | |
 | C19 | `=FooterText&" — "&CompanyName&" — "&UnauditedText` | 10 pt italic, `#404040` on `#D9D9D9`, across C:H |
 | R1 | `Go to Index`, a link to `Index!A1` | |
 
@@ -132,21 +132,25 @@ Font from the Normal style. Gridlines off. Print area C1:H21, landscape, fit to 
 | 5 | Current period end | `=PeriodEnd`, format `mmmm d, yyyy` | `CovPE` |
 | 6 | Prior-year period end | `=PriorPeriodEnd`, same | `CovPPE` |
 | 7 | Prior quarter end | `=PriorQtrEnd`, same | `CovPQE` |
-| 8 | Period end (month day,) | `=TEXT(PeriodEnd,"mmmm d,")` | `CovPEmd` |
-| 9 | Prior quarter end (month day,) | `=TEXT(PriorQtrEnd,"mmmm d,")` | `CovPQEmd` |
-| 10 | Month name | `=TEXT(PeriodEnd,"mmmm")` | `CovMonth` |
+| 8 | Period end (month day,) | `=INDEX(MonthNames,MONTH(PeriodEnd))&" "&DAY(PeriodEnd)&","` | `CovPEmd` |
+| 9 | Prior quarter end (month day,) | `=INDEX(MonthNames,MONTH(PriorQtrEnd))&" "&DAY(PriorQtrEnd)&","` | `CovPQEmd` |
+| 10 | Month name | `=INDEX(MonthNames,MONTH(PeriodEnd))` | `CovMonth` |
 | 11 | Quarter name | `=CHOOSE(Quarter,"First","Second","Third","Fourth")` | `CovQtrName` |
 | 12 | Months in year to date | `=Period` | |
 | 13 | Months word | `=CHOOSE(Period,"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen")` | `CovMonthsWord` |
-| 14 | Period end (long) | `=TEXT(PeriodEnd,"mmmm d, yyyy")` | `CovPElong` |
+| 14 | Period end (long) | `=CovMonth&" "&DAY(PeriodEnd)&", "&YEAR(PeriodEnd)` | `CovPElong` |
 | 15 | Year-to-date basis | `=IF(Period=PeriodsPerYear,"Year Ended",IF(Period=1,"Month Ended",CovMonthsWord&" Months Ended"))` | `CovYTDBasis` |
 | 16 | Quarter-to-date basis | `=CHOOSE(MOD(Period-1,3)+1,"Month Ended","Two Months Ended","Three Months Ended")` | `CovQTDBasis` |
 | 17 | Year-to-date layout label | `=IF(Period=PeriodsPerYear,"Year Ended","Year to Date")` | `CovYTDLayout` |
-| 18 | Year-to-date phrase (current) | `="the "&LOWER(CovYTDBasis)&" "&TEXT(PeriodEnd,"mmmm d, yyyy")` | `CovYTDPhrase` |
-| 19 | Year-to-date phrase (prior) | `="the "&LOWER(CovYTDBasis)&" "&TEXT(PriorPeriodEnd,"mmmm d, yyyy")` | `CovYTDPhrasePY` |
-| 20 | Quarter phrase (current) | `="the "&LOWER(CovQTDBasis)&" "&TEXT(PeriodEnd,"mmmm d, yyyy")` | `CovQTDPhrase` |
-| 21 | Quarter phrase (prior) | `="the "&LOWER(CovQTDBasis)&" "&TEXT(PriorPeriodEnd,"mmmm d, yyyy")` | `CovQTDPhrasePY` |
+| 18 | Year-to-date phrase (current) | `="the "&LOWER(CovYTDBasis)&" "&CovPElong` | `CovYTDPhrase` |
+| 19 | Year-to-date phrase (prior) | `="the "&LOWER(CovYTDBasis)&" "&CovPPElong` | `CovYTDPhrasePY` |
+| 20 | Quarter phrase (current) | `="the "&LOWER(CovQTDBasis)&" "&CovPElong` | `CovQTDPhrase` |
+| 21 | Quarter phrase (prior) | `="the "&LOWER(CovQTDBasis)&" "&CovPPElong` | `CovQTDPhrasePY` |
 | 22 | Month, quarter and year layout label | `=IF(Period=PeriodsPerYear,"Month, Quarter and Year Ended","Month, Quarter and Year to Date")` | `CovMQYLayout` |
+| 23 | Prior-year period end (long) | `=INDEX(MonthNames,MONTH(PriorPeriodEnd))&" "&DAY(PriorPeriodEnd)&", "&YEAR(PriorPeriodEnd)` | `CovPPElong` |
+| 24 | Last data refresh (text) | `=IF(ISNUMBER(RefreshTime),INDEX(MonthNames,MONTH(RefreshTime))&" "&DAY(RefreshTime)&", "&YEAR(RefreshTime)&" "&(MOD(HOUR(RefreshTime)+11,12)+1)&":"&RIGHT("0"&MINUTE(RefreshTime),2)&IF(HOUR(RefreshTime)<12," AM"," PM"),RefreshTime)`, which keeps the text `FSN.LastDataRefresh` returns before the first refresh | `CovRefresh` |
+
+**MonthNames** is a workbook name that holds a constant: `context.workbook.names.add("MonthNames", '={"January","February","March","April","May","June","July","August","September","October","November","December"}')`. Every date label takes its month name from it. `TEXT` reads its date codes in the Excel language: German Excel needs `JJJJ` and `TT`, so `TEXT(d,"mmmm d, yyyy")` shows `d` and `yyyy` as letters there.
 
 ---
 
@@ -173,4 +177,4 @@ Column G is outside the print area: it shows the preparer each page's checks, an
 
 The pages and the front sheets use these workbook-level names. Before you build, check that the workbook has none of them and no sheet named Inputs, Cover, Index, Lists or a number (`references/excel-mechanics.md`, "Before you start").
 
-`Affiliates`, `Book`, `BookChecks`, `BudgetCat`, `CashExtraAccounts`, `ClassColumns`, `CompanyName`, `CovCY`, `CovMonth`, `CovMonthsWord`, `CovMQYLayout`, `CovPE`, `CovPElong`, `CovPEmd`, `CovPPE`, `CovPQE`, `CovPQEmd`, `CovPY`, `CovQTDBasis`, `CovQTDPhrase`, `CovQTDPhrasePY`, `CovQtrName`, `CovYTDBasis`, `CovYTDLayout`, `CovYTDPhrase`, `CovYTDPhrasePY`, `CurFY`, `CurYear`, `DepartmentColumns`, `FooterText`, `IntercompanyAccounts`, `ListBooks`, `ListBudgetCategories`, `ListClasses`, `ListCurrencies`, `ListDepartments`, `ListFiscalYears`, `ListLocations`, `ListSubsidiaries`, `ListSubsidiaryMembers`, `LocationColumns`, `MatAmt`, `MatPct`, `Period`, `PeriodEnd`, `PeriodsPerYear`, `PriorFY`, `PriorFY2`, `PriorFY3`, `PriorFY4`, `PriorPeriodEnd`, `PriorQtrEnd`, `PriorQtrPeriod`, `PriorYear`, `Quarter`, `RangeBSMove`, `RangeITD`, `RangeMTD`, `RangeQTD`, `RangeYTD`, `RefreshTime`, `ReportCurrency`, `Scope`, `Subsidiary`, `SubsidiaryColumns`, `UnauditedText`.
+`Affiliates`, `Book`, `BookChecks`, `BudgetCat`, `CashExtraAccounts`, `ClassColumns`, `CompanyName`, `CovCY`, `CovMonth`, `CovMonthsWord`, `CovMQYLayout`, `CovPE`, `CovPElong`, `CovPEmd`, `CovPPE`, `CovPPElong`, `CovPQE`, `CovPQEmd`, `CovPY`, `CovQTDBasis`, `CovQTDPhrase`, `CovQTDPhrasePY`, `CovQtrName`, `CovRefresh`, `CovYTDBasis`, `CovYTDLayout`, `CovYTDPhrase`, `CovYTDPhrasePY`, `CurFY`, `CurYear`, `DepartmentColumns`, `FooterText`, `IntercompanyAccounts`, `ListBooks`, `ListBudgetCategories`, `ListClasses`, `ListCurrencies`, `ListDepartments`, `ListFiscalYears`, `ListLocations`, `ListSubsidiaries`, `ListSubsidiaryMembers`, `LocationColumns`, `MatAmt`, `MatPct`, `MonthNames`, `Period`, `PeriodEnd`, `PeriodsPerYear`, `PriorFY`, `PriorFY2`, `PriorFY3`, `PriorFY4`, `PriorPeriodEnd`, `PriorQtrEnd`, `PriorQtrPeriod`, `PriorYear`, `Quarter`, `RangeBSMove`, `RangeITD`, `RangeMTD`, `RangeQTD`, `RangeYTD`, `RefreshTime`, `ReportCurrency`, `Scope`, `Subsidiary`, `SubsidiaryColumns`, `UnauditedText`.
