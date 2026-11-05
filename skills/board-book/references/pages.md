@@ -124,7 +124,7 @@ Three heading rows (20 to 22); the body starts at row 23 and the panes freeze th
 | Col | Kind | Sub (6) | Fiscal year (7) | Period (8) | Range (9) | Row 20 | Row 21 | Row 22 |
 |---|---|---|---|---|---|---|---|---|
 | F | Actual | `=Subsidiary` | `=CurFY` | `=Period` | `=RangeYTD` | `Month over Month` across F:I | `=CovPEmd` | `=CovCY` |
-| G | Actual | `=Subsidiary` | `=IF(Period=1,PriorFY,CurFY)` | `=IF(Period=1,PeriodsPerYear,Period-1)` | `=RangeYTD` | | `=FSN.PeriodToDate(G$7,G$8)`, format `mmmm d,` | `=YEAR(G21)` |
+| G | Actual | `=Subsidiary` | `=IF(Period=1,PriorFY,CurFY)` | `=IF(Period=1,PeriodsPerYear,Period-1)` | `=RangeYTD` | | `=INDEX(MonthNames,MONTH(FSN.PeriodToDate(G$7,G$8)))&" "&DAY(FSN.PeriodToDate(G$7,G$8))&","` | `=YEAR(FSN.PeriodToDate(G$7,G$8))` |
 | H | `=F<r>-G<r>` | | | | | | | `$ Change` |
 | I | `=IFERROR(H<r>/ABS(G<r>),0)` | | | | | | | `% Change` |
 | J | Spacer | | | | | | | |
@@ -133,7 +133,7 @@ Three heading rows (20 to 22); the body starts at row 23 and the panes freeze th
 | M, N | `=K-L`, `=IFERROR(M/ABS(L),0)` | | | | | | | `$ Change`, `% Change` |
 | O | Spacer | | | | | | | |
 | P | Actual | as F | as F | as F | as F | `=CovYTDBasis` across P:S | `=CovPEmd` | `=CovCY` |
-| Q | Actual | `=Subsidiary` | `=PriorFY` | `=PeriodsPerYear` | `=RangeYTD` | | `=FSN.PeriodToDate(Q$7,Q$8)`, format `mmmm d,` | `=YEAR(Q21)` |
+| Q | Actual | `=Subsidiary` | `=PriorFY` | `=PeriodsPerYear` | `=RangeYTD` | | `=INDEX(MonthNames,MONTH(FSN.PeriodToDate(Q$7,Q$8)))&" "&DAY(FSN.PeriodToDate(Q$7,Q$8))&","` | `=YEAR(FSN.PeriodToDate(Q$7,Q$8))` |
 | R, S | `=P-Q`, `=IFERROR(R/ABS(Q),0)` | | | | | | | `$ Change`, `% Change` |
 | T | Spacer | | | | | | | |
 
