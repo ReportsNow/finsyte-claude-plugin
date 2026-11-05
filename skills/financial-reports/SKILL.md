@@ -1,6 +1,6 @@
 ---
 name: financial-reports
-description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. Not for financial statements or accounting work outside Finsyte and NetSuite."
+description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill, and a multi-page board book to the board-book skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
 ---
 
 # Finsyte for NetSuite
@@ -121,7 +121,7 @@ Type the values as plain text without quote marks: `FY 2026`, `FSN_L0_INC`, `Hea
 
 ### Inputs are never volatile
 
-Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous: two or more calls that depend on a volatile cell restart each other after every result, so Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
+Every cell a Finsyte call reads, directly or through other formulas, holds a typed value, a relative period such as `<Current>`, or a formula with no volatile function in it. The volatile functions are `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, and a `SUMIF` whose sum range is a different size from its criteria range. Finsyte calls are asynchronous, so two or more calls that depend on a volatile cell can restart each other: with results that arrive at different times, such as a closed period served from the cache next to an open period fetched live, Excel recalculates every 2 seconds until the workbook is closed, and with caching off every restart queries NetSuite again.
 
 | Instead of | Use |
 |---|---|
@@ -236,12 +236,14 @@ A report with a fixed list of account rows goes stale silently. A GL account add
 =FSN.Range.AccountNumbers($B$6, $B$21:$B$216, $B$2,,,,,,TRUE)
 ```
 
-- **Include Filter:** the report's statement code in a parameter cell: `FSN_L0_BAL` or `FSN_L0_INC`.
-- **Exclude Filter:** the range that holds the report's account numbers.
+- **Include Filter:** the report's statement code in a parameter cell: `FSN_L0_BAL` or `FSN_L0_INC`. A report with code rows or summary account rows narrows it (below).
+- **Exclude Filter:** the range that holds the report's account numbers. It removes only the accounts it names.
 - **Subsidiary:** the report's Subsidiary cell.
 - **Posting Only**, the last argument: TRUE for a report that lists posting accounts only, including the plain Trial Balance templates. Leave it blank when the report lists summary accounts too, as the other templates do, or every summary account shows as missing.
 
 The check doesn't suit the Cash Flow templates, which leave out Bank accounts and Undeposited Funds by design.
+
+**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, the accounts NetSuite adds later included, so those accounts need no check. The Exclude Filter removes only the accounts it names, so a check that includes them lists them all. Put in the Include Filter cell only the parts of the chart the report lists account by account: the codes of those types, or the parent accounts of those accounts, joined with `^`. On a P&L whose revenue lists its accounts and whose cost of sales and operating expenses are code rows, the Include Filter cell holds `FSN_L3_INC`.
 
 It returns one blank cell when nothing is missing and spills the missing account numbers otherwise. Put a flag beside it (here the check is in `$Z$220`):
 
@@ -249,21 +251,31 @@ It returns one blank cell when nothing is missing and spills the missing account
 =IF(COUNTA($Z$220#)=COUNTBLANK($Z$220#), "✓ All accounts present", "⚠ Missing accounts — see below")
 ```
 
-`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula.
+`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula. An account that a code row or a summary account row counts gets no row of its own: the total would count the account twice.
 
 ---
 
 ## Gotchas
 
-1. **`#VALUE!` after pointing a parameter at another cell.** A cell formatted as Text stores a formula as text (`=Drivers!$C$10` shows in the cell), and every call that reads it returns `#VALUE!`. The Period cell is Text-formatted on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow. Set the cell to General, then enter the formula. In Office.js, set `numberFormat` to General and sync before setting `formulas`; Period should read back as a number.
+1. **`#VALUE!` after pointing a parameter at another cell.** A cell formatted as Text stores a formula as text (`=Drivers!$C$10` shows in the cell). A call that reads it returns a message, such as `Invalid period number` for the Period, and a call with a leading minus shows `#VALUE!` in place of the message. The Period cell is Text-formatted on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow. Set the cell to General, then enter the formula. In Office.js, set `numberFormat` to General and sync before setting `formulas`; Period should read back as a number.
 2. **Wait for `#GETTING_DATA` to clear.** Finsyte pulls asynchronously. Values read while any cell shows `#GETTING_DATA` are partial, and a total that looks wrong mid-refresh is almost never a wrong code. Don't swap codes to fix it.
-3. **Never guess account numbers.** A number that doesn't exist returns `Invalid account number 'xxxx'`. Take numbers from `FSN.Range.AccountNumbers` or from the user's sheet.
+3. **Never guess account numbers.** A number that doesn't exist returns `Invalid account number`. Take numbers from `FSN.Range.AccountNumbers` or from the user's sheet.
 4. **`#SPILL!`.** Range functions, `Query`, `SavedSearch`, and `Dataset` spill, so leave room. An empty result is one blank cell.
 5. **Summary accounts in a flat list.** `FSN.Range.AccountNumbers` returns parent accounts with their children, and a parent's balance already includes its children. For a flat list totaled with `AGGREGATE`, set Posting Only (the 9th argument) to TRUE.
 6. **Rollup entries in segment lists.** `FSN.Range.Departments`, `.Classifications`, and `.Locations` include a `Parent (Hierarchy)` entry for each parent by default, which overlaps its children. For one column per department, set Include Rollup (the 7th argument) to FALSE.
 7. **Subsidiary access.** Not every account is available to every subsidiary; `FSN.SubHasAccess` checks.
 8. **Custom segments** appear in functions and dropdowns only after they are set up in Help › Preferences › Custom Segments and Excel is restarted.
 9. **What the user can do from Finsyte's menus.** Finsyte ribbon › Refresh Data offers Entire Workbook, Current Sheet, List Data, Purge Function Cache, and Data Connections. Right-clicking a Finsyte value offers Refresh Selection, Drill Down (to transactions, segments, subsidiaries, or periods), Switch Sign, Go to Budget, Static Snapshot Selection, and A/R or A/P Aging.
+
+---
+
+## Workbook health check
+
+A health check of a whole workbook, for what makes the workbook slow or gives wrong numbers, belongs to the `workbook-health-check` skill in this plugin. The health check skill points to the sections of this skill for its fixes.
+
+## Board book
+
+A multi-page board of directors package, with a cover, an index, and statements by month, quarter, year, subsidiary, segment and budget, belongs to the `board-book` skill in this plugin. A one-page board or KPI summary stays here (`references/model-building.md`).
 
 ---
 
@@ -276,7 +288,7 @@ Run these before handing over any report or model. Each one is pass or fail.
 3. **Nothing made up.** No `#NAME?` (such as `BudgetAccountNetIncome`), no `Invalid account number`, no invented `FSN_` codes.
 4. **Signs are right.** Credit-normal actuals negated once; budgets and CTA never negated; template rows not negated a second time.
 5. **Formulas you wrote follow the conventions.** No literals inside calls, Subsidiary filled in, one call per cell with nothing around it but `-`, totals as `AGGREGATE(9,0,…)`, and no line item written as an `AGGREGATE`. Finsyte's own template formulas are exempt.
-6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `RAND`, `RANDBETWEEN`, or a `SUMIF` with ranges of different sizes.
+6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, or a `SUMIF` with ranges of different sizes.
 7. **The report is complete.** The missing-accounts check is present and clean on every report that lists accounts.
 8. **It re-points from one place.** Changing an input and refreshing updates every number, label, and title, and no `FY 20xx` or subsidiary name is typed anywhere but the input cells.
 9. **A converted sheet ties** to its original (`references/converting.md`).

@@ -2,9 +2,15 @@
 
 [Finsyte](https://www.finsyte.com) is an Excel add-in for building financial reports and models on NetSuite data. Finance and FP&A teams, accountants, and board members work from Finsyte workbooks, and NetSuite stays the source of truth: every number is a live `=FSN.` formula that refreshes from NetSuite instead of being re-keyed.
 
-This plugin adds the **financial-reports** skill, which teaches Claude how Finsyte works so it can help you build new reports and models and change the ones you have. Claude starts from Finsyte's report templates, pulls any account, account type, or rollup with the right parameters, lays reports out by NetSuite account type the way NetSuite does, and keeps signs, totals, and segment arguments right. The result is a workbook that ties out to NetSuite and re-points to a new period or subsidiary by changing one cell.
+This plugin adds three skills.
 
-Claude uses the skill on its own whenever a request involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call it directly with `/finsyte:financial-reports`.
+- **financial-reports** teaches Claude how Finsyte works so it can help you build new reports and models and change the ones you have. Claude starts from Finsyte's report templates, pulls any account, account type, or rollup with the right parameters, lays reports out by NetSuite account type the way NetSuite does, and keeps signs, totals, and segment arguments right. The result is a workbook that ties out to NetSuite and re-points to a new period or subsidiary by changing one cell.
+- **workbook-health-check** reads a whole Finsyte workbook and reports what makes the workbook slow to calculate, open, or save, and what can give wrong numbers. The health check changes nothing until you confirm the exact edits for a fix, and the health check uses the financial-reports skill for how Finsyte works.
+- **board-book** builds a board of directors reporting package from your chart of accounts: an inputs sheet, a cover, an index, and pages of statements by month, quarter, and year, trends, a five-year history, consolidating statements, statements by department, class, or location, and budget vs actual, each with KPIs and checks that tie it to NetSuite. Claude asks a short series of questions first and builds only after you approve the plan.
+
+Claude uses the skills on its own for any request that involves Finsyte, FSN formulas, or NetSuite data in Excel. In Claude Code you can also call them directly with `/finsyte:financial-reports`, `/finsyte:workbook-health-check`, and `/finsyte:board-book`.
+
+A Finsyte skill added earlier from the Finsyte website, named finsyte-netsuite, is an older copy of financial-reports: turn it off after you install the plugin.
 
 ## What it helps with
 
@@ -14,6 +20,8 @@ Claude uses the skill on its own whenever a request involves Finsyte, FSN formul
 - Laying out rows and columns from NetSuite lists, so new departments, subsidiaries, and accounts show up on refresh
 - Replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas, then tying every converted cell back to the original
 - Diagnosing `#VALUE!`, `#NAME?`, `Invalid account number`, `#GETTING_DATA`, `#SPILL!`, and sign errors in FSN formulas
+- Running a health check on a whole workbook with the workbook-health-check skill: volatile inputs, FSN errors, report totals and missing accounts, whole-column references, and other things that make a workbook slow or wrong, with fixes made only after you confirm them
+- Building a board book with the board-book skill: questions about the entity, period, pages, and lines first, then a multi-page package that rolls forward by changing the period on one sheet
 - Adding a check that flags GL accounts created in NetSuite after a report was built, so totals don't go stale silently
 
 ## Requirements
@@ -30,14 +38,24 @@ Claude writes the formulas. The Finsyte add-in evaluates them in Excel, against 
 3. "Build a one-page board summary with revenue, gross margin, operating expenses, and net income for this quarter, compared with budget and with the same quarter last year."
 4. "I exported our December 2025 balance sheet from NetSuite into this workbook. Convert it to live Finsyte formulas and show me any rows that don't tie to the original."
 5. "Every FSN.GLAccountBalance cell on my P&L shows #VALUE! since I pointed its parameter cells at a Drivers sheet. What's wrong?"
+6. "Run a health check on this workbook. It takes a minute to recalculate and I don't know why."
+7. "Build our board book for December, consolidated, with the department pages and the Board Approved budget."
 
 ## What this plugin does and doesn't do
 
 This plugin contains instructions and reference material only: Markdown files that Claude reads. It contains no executable code or scripts, makes no network requests, and does not collect, store, or send any data. When Claude works in your workbook it writes Excel formulas, which the Finsyte add-in evaluates. The plugin covers reporting with Finsyte's functions and does not create, change, or delete records in NetSuite.
 
+A health check reads the formulas, values, and settings of the whole workbook and changes nothing until you confirm a fix.
+
+A board book is built in Excel for Windows with Finsyte signed in, in a new workbook. Before you approve the plan, Claude adds only a hidden Lists sheet and the Inputs cells it needs to read your NetSuite lists and chart of accounts.
+
 All NetSuite access happens in the Finsyte add-in on your computer, under your NetSuite login and role. How Finsyte handles your data is described in the [Finsyte privacy policy](https://www.finsyte.com/privacy-policy).
 
 AI-generated output can contain errors. Review every report before relying on it; the skill's tie-out and QA steps are there to help with that.
+
+## For maintainers
+
+Finsyte conventions live in the financial-reports skill: functions, signs, formula conventions, and fixes for FSN errors. Topic skills such as workbook-health-check and board-book point to its sections and hold only their own rules, so a change to how Finsyte works is made in one place.
 
 ## Documentation and support
 

@@ -46,11 +46,12 @@ Returns the balance of an account, or of a set of accounts, for the slice of dat
 
 - A posting account number.
 - A summary (parent) account: returns the parent and its children, so don't also add the children in the same total.
-- `FSN_L1_*`, `FSN_L2_*`, `FSN_L3_*`: every account in that category, group, or account type.
+- A posting parent, an account with children that takes postings itself: returns its own postings only. Its children need rows of their own.
+- `FSN_L1_*`, `FSN_L2_*`, `FSN_L3_*`: every account in that category, group, or account type, inactive accounts included.
 - `FSN_L0_INC`: the whole income statement. `FSN_L0_BAL` returns "Not Supported".
 - `FSN_L4_NIN` net income, `FSN_L4_RET` retained earnings (non-zero only under `YTD`), `FSN_L4_CBP` cash at the beginning of the period.
 - A statistical account: returns its amount, the same as `FSN.StatAccountAmount`.
-- Several accounts as a `^` string, a range, or a named range: returns their total. `FSN_L4_NIN` and `FSN_L4_RET` can't be part of a list.
+- Several accounts or codes as a `^` string, a range, or a named range: returns their total, each account once. A code or a summary account in the list brings in the accounts under it. `FSN_L4_NIN` and `FSN_L4_RET` can't be part of a list.
 
 **Notes:**
 
@@ -244,9 +245,11 @@ The Include and Exclude filters of every Range function accept:
 | `-` | `1000-2000` | A range of values |
 | `?` | `10?0` | Any single character |
 | `*` | `1*` | Anything starting with 1 |
-| An `FSN_` code | `FSN_L3_BNK` | That rollup, and the accounts under it when Include Children is TRUE |
+| An `FSN_` code | `FSN_L3_BNK` | In the Include Filter, that rollup, plus the accounts under it with Include Children TRUE. In the Exclude Filter, the rollup entry only |
 
 A cell range or named range also works, and each cell in it can hold any of these patterns.
+
+The Exclude Filter removes only the values it names. Include Children adds the accounts under an Include Filter match only, so a code or a summary account in the Exclude Filter leaves the accounts under it in the result. To leave those accounts out, keep them out of the Include Filter (*Keep reports complete*).
 
 ### FSN.Range.AccountNumbers, FSN.Range.Accounts
 
@@ -314,7 +317,7 @@ These still calculate. All but `FSN.CashAtBeginningOfPeriod` are hidden from Exc
 | `FSN.GLAccountCategoryBalance(…, "Asset")` | `FSN.GLAccountBalance(…, FSN_L1_AST)` |
 | `FSN.CashAtBeginningOfPeriod(…)` | `FSN.GLAccountBalance(…, FSN_L4_CBP)` |
 
-When one of them already appears in a user's workbook, it's working; there's no need to rewrite it unless the user asks. Note that `FSN.GLAccountRetainedEarnings` and `FSN.GLAccountNetIncome` take no Account argument, so their segment arguments sit one or two places earlier than `GLAccountBalance`'s.
+One of them that already appears in a user's workbook works and needs no rewrite; rewrite it at the user's request. `FSN.GLAccountNetIncome` and `FSN.GLAccountRetainedEarnings` take fewer arguments than `GLAccountBalance`, so their custom segment arguments start at the 13th argument (`GLAccountNetIncome`) and the 12th (`GLAccountRetainedEarnings`), against the 15th for `GLAccountBalance`.
 
 ---
 
