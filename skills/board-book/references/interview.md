@@ -21,9 +21,12 @@ After Lists A to F settle.
 1. **Subsidiary.** The list from `ListSubsidiaries`. Default: the top `(Consolidated)` entry, the one whose subsidiary has no parent; the only subsidiary when there is one.
 2. **Fiscal year and period.** Default: the period that holds the last day of last month. Show its end date, such as "FY 2025, period 12 (December 31, 2025)". A board book is tied to a close, so the book holds these as fixed values: changing them on Inputs moves the whole book.
 3. **Accounting book.** Only with more than one book. Default: the first in the list, the primary book.
-4. **Reporting currency.** Only when the subsidiary tree holds more than one currency. Default: the subsidiary's own currency, with `=FSN.CurrencyName(Subsidiary)` in Inputs C8, so the currency follows the subsidiary. Every page reports in this currency. Another pick is typed in C8, and the reply says that the budget columns stay in the subsidiary's currency: `FSN.BudgetAccountBalance` has no currency argument.
 
-After the answers, write Inputs C5, C11 and C14 with their names, then the rest of the discovery. If discovery finds an adjustment period with year-end entries (`references/excel-mechanics.md`, "Periods per year"), tell the user the amount and that the book reports regular periods, so period `<PeriodsPerYear>` leaves those entries out; ask whether to note that in the footer text.
+After the answers, write Inputs C5, C11 and C14 with their names, then the rest of the discovery. Then:
+
+4. **Reporting currency**, for a subsidiary with a parent in another currency (the subsidiary tree from discovery shows each parent and its currency). Offer the subsidiary's own currency, the default, and the currency of each parent above it, and no other: NetSuite's consolidated exchange rates run from a subsidiary to its parents only, so Finsyte returns `Invalid Currency` for a child's or a sibling's currency, and older Finsyte versions show `Error`. A subsidiary with no parent in another currency, such as the top `(Consolidated)` entry, reports in its own currency with no question: state it in the plan. The default puts `=FSN.CurrencyName(Subsidiary)` in Inputs C8, so the currency follows the subsidiary. Every page reports in this currency. A parent's currency is typed in C8, and the reply says that the budget columns stay in the subsidiary's currency: `FSN.BudgetAccountBalance` has no currency argument.
+
+If discovery finds an adjustment period with year-end entries (`references/excel-mechanics.md`, "Periods per year"), tell the user the amount and that the book reports regular periods, so period `<PeriodsPerYear>` leaves those entries out; ask whether to note that in the footer text.
 
 ---
 

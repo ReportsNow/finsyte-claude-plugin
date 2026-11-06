@@ -18,18 +18,18 @@ A hidden sheet named `Lists`. Row 1 holds headings; each list spills down from r
 
 | Column | Heading | Row 2 formula | Name |
 |---|---|---|---|
-| A | Subsidiaries | `=FSN.Range.Subsidiaries()` | `ListSubsidiaries` |
-| B | Subsidiaries, not consolidated | `=FSN.Range.Subsidiaries(,,,,FALSE)` | `ListSubsidiaryMembers` |
+| A | Subsidiaries | `=FSN.Range.Subsidiaries(,,,FALSE)` | `ListSubsidiaries` |
+| B | Subsidiaries, not consolidated | `=FSN.Range.Subsidiaries(,,,FALSE,FALSE)` | `ListSubsidiaryMembers` |
 | C | Accounting books | `=FSN.Range.AccountingBooks()` | `ListBooks` |
 | D | Currencies | `=FSN.Range.Currencies()` | `ListCurrencies` |
 | E | Fiscal years, latest first | `=FSN.Range.Periods.FY(FALSE,FALSE)` | `ListFiscalYears` |
 | F | Budget categories | `=FSN.Range.BudgetCategories()` | `ListBudgetCategories` |
-| G | Departments | `=FSN.Range.Departments(,,Subsidiary,FALSE)` | `ListDepartments` |
-| H | Classes | `=FSN.Range.Classifications(,,Subsidiary,FALSE)` | `ListClasses` |
-| I | Locations | `=FSN.Range.Locations(,,Subsidiary,FALSE)` | `ListLocations` |
+| G | Departments | `=FSN.Range.Departments(,,Subsidiary,FALSE,,FALSE)` | `ListDepartments` |
+| H | Classes | `=FSN.Range.Classifications(,,Subsidiary,FALSE,,FALSE)` | `ListClasses` |
+| I | Locations | `=FSN.Range.Locations(,,Subsidiary,FALSE,,FALSE)` | `ListLocations` |
 | J | Periods | `=SEQUENCE(PeriodsPerYear)` | `ListPeriods` |
 
-Each name refers to the spill, such as `=Lists!$A$2#`. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it; column J reads the periods per year, so write it after Inputs C34 holds them. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
+Each name refers to the spill, such as `=Lists!$A$2#`. Include Inactive is typed `FALSE` in A, B and G to I: left blank, it follows each user's Preferences setting for inactive items in dropdowns, and the book's lists would differ from user to user. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it; column J reads the periods per year, so write it after Inputs C34 holds them. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
 
 Columns from K are the discovery area while you build (`references/excel-mechanics.md`, "Discovery"). Clear it when the book is built.
 
@@ -48,12 +48,12 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 5 | Subsidiary | Typed | `Subsidiary` | `ListSubsidiaries` |
 | 6 | Scope | `=IF(ISNUMBER(SEARCH("(Consolidated)",C5)),"Consolidated","Subsidiary")` | `Scope` | |
 | 7 | Accounting book | Typed | `Book` | `ListBooks` |
-| 8 | Reporting currency | `=FSN.CurrencyName(Subsidiary)`, colored as a typed input: it follows the subsidiary until the user picks another currency from the dropdown | `ReportCurrency` | `ListCurrencies` |
+| 8 | Reporting currency | `=FSN.CurrencyName(Subsidiary)`, colored as a typed input: it follows the subsidiary until the user picks a parent subsidiary's currency, the one other choice NetSuite can translate into (`references/interview.md`, round 1) | `ReportCurrency` | `ListCurrencies` |
 | 9 | **Periods** | | | |
 | 10 | Current year | `=YEAR(C17)`, format `0` | `CurYear` | |
 | 11 | Current fiscal year | Typed, such as `FY 2025` | `CurFY` | `ListFiscalYears` |
 | 12 | Prior year | `=C10-1`, format `0` | `PriorYear` | |
-| 13 | Prior fiscal year | `=IFERROR(INDEX(ListFiscalYears,MATCH(C11,ListFiscalYears,0)+1),"")` | `PriorFY` | |
+| 13 | Prior fiscal year | `=LET(y,IFERROR(INDEX(ListFiscalYears,MATCH(C11,ListFiscalYears,0)+1),""),IF(LEFT(y,1)="<","",y))` | `PriorFY` | |
 | 14 | Period | Typed number | `Period` | `ListPeriods` |
 | 15 | Quarter | `=ROUNDUP(C14/3,0)` | `Quarter` | |
 | 16 | Prior quarter-end period | `=IF(C15=1,C34,(C15-1)*3)` | `PriorQtrPeriod` | |
@@ -76,7 +76,7 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 33 | Unaudited text | Typed, default `Unaudited`; empty for audited figures | `UnauditedText` | |
 | 34 | Periods per fiscal year | Typed, from discovery | `PeriodsPerYear` | |
 | 36 | **Earlier fiscal years** | | | |
-| 37 | Two years prior | `=IFERROR(INDEX(ListFiscalYears,MATCH(C11,ListFiscalYears,0)+2),"")` | `PriorFY2` | |
+| 37 | Two years prior | `=LET(y,IFERROR(INDEX(ListFiscalYears,MATCH(C11,ListFiscalYears,0)+2),""),IF(LEFT(y,1)="<","",y))` | `PriorFY2` | |
 | 38 | Three years prior | the same with `+3` | `PriorFY3` | |
 | 39 | Four years prior | the same with `+4` | `PriorFY4` | |
 | 41 | **Accounts** | | | |
@@ -86,6 +86,8 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 46 on | Affiliate 1, 2, … | Typed entity names, one per row | `Affiliates`, over all the rows; with no names, C46 alone, empty, so the Cover's formula still reads it | |
 
 `FSN.LastDataRefresh` recalculates every time Excel calculates, by design. No Finsyte call reads row 31, so it slows nothing.
+
+**Earlier fiscal years.** Rows 13 and 37 to 39 drop a value that starts with `<`: with the Relative Periods preference on, relative values such as `<Current>` follow the fiscal years in `ListFiscalYears`, and a book near its oldest year would read them as fiscal years.
 
 **Quarter.** Rows 15, 16 and 19 assume three periods per quarter. For a year of 13 periods, ask the user which period ends each quarter, type Quarter and Prior quarter-end period in C15 and C16 as values, and tell the user to update them with the period.
 
