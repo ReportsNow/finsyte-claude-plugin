@@ -1,6 +1,6 @@
 ---
 name: financial-reports
-description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; or #VALUE!, #NAME?, Invalid account number, #GETTING_DATA, #SPILL!, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill, and a multi-page board book to the board-book skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
+description: "Use when the user is building, changing, or checking an Excel report or financial model that pulls NetSuite data through Finsyte (the Excel add-in for NetSuite): balance sheets, income statements, cash flow, trial balances, budget vs actual, departmental or trailing P&Ls, KPI or board summaries; a workbook with =FSN. formulas or a Finsyte report template; replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas; Finsyte range functions or dropdowns; transaction lines, segment breakdowns, A/R or A/P aging, SuiteQL queries, saved searches or datasets pulled into a sheet with FSN functions; or #VALUE!, #NAME?, Invalid account number and other Finsyte messages, #GETTING_DATA, #SPILL!, zeros from a paused Finsyte, or sign errors in FSN formulas. A health check of a whole workbook belongs to the workbook-health-check skill, and a multi-page board book to the board-book skill. Not for financial statements or accounting work outside Finsyte and NetSuite."
 ---
 
 # Finsyte for NetSuite
@@ -16,7 +16,7 @@ Load one only when the task needs it:
 | `references/templates.md` | A report starts from, or already is, a Finsyte template: the 11 templates, their parameters, layouts, and sign rules, and how to customize one |
 | `references/model-building.md` | Building a model: a Drivers tab, dropdowns, department or subsidiary columns, budget vs actual, trailing twelve months, KPI and board summaries |
 | `references/converting.md` | Replacing hard-coded numbers in a spreadsheet or NetSuite export with Finsyte formulas, including CTA and the tie-out |
-| `references/functions.md` | You need a function's full argument list, the Range function arguments, worked period-range examples, the sign of each account type, or the full tree of `FSN_` codes |
+| `references/functions.md` | You need a function's full argument list, the Range function arguments and the lists for dropdowns, the drilldown functions, the cause of a Finsyte message, worked period-range examples, the sign of each account type, or the full tree of `FSN_` codes |
 
 ---
 
@@ -33,16 +33,19 @@ What goes in the Account argument decides what comes back, so one function cover
 | Account argument | Returns | Example |
 |---|---|---|
 | A posting account number | That account's balance | `4000` |
-| A summary (parent) account | The parent and all of its children | `6000` |
+| A summary account (Summary checked in NetSuite) | Every account under it | `6500` |
+| A parent account that takes postings itself | Its own postings only. `FSN.GLAccountSummaryBalance` returns it together with every account under it | `6000` |
 | An account type code, `FSN_L3_*` | Every account of that NetSuite account type | `FSN_L3_BNK`, all Bank accounts |
 | A group or category code, `FSN_L2_*` or `FSN_L1_*` | Every account in that group or category | `FSN_L2_CAS` Current Assets, `FSN_L1_AST` Assets |
-| Several accounts | Their total | `4000^4010`, a cell range, or a named range |
+| Several accounts of one statement | Their total, each account once. A summary account or a code in the list brings in the accounts under it | `4000^4010`, a cell range, or a named range |
 | `FSN_L4_NIN`, `FSN_L4_RET`, `FSN_L4_CBP` | Net income, retained earnings, and cash at the beginning of the period, calculated by Finsyte | |
 | A statistical account | Its amount: headcount, units, square feet | `9900` |
 
 `FSN_L0_BAL` is the one code it doesn't accept (it returns "Not Supported"); use `FSN_L1_AST` and `FSN_L1_LEQ`. The full tree of codes is in `references/functions.md`. Never invent a code by analogy: there is no `FSN_L1_INC`.
 
-Budgets work the same way. `FSN.BudgetAccountBalance(Subsidiary, Fiscal Year, Period, Period Range, Account, Budget Category, …)` takes account numbers, summary accounts, lists, and the `FSN_L1` to `FSN_L3` codes, plus `FSN_L4_NIN` for budgeted net income. It doesn't accept the other `FSN_L4` codes or the `FSN_L0` codes.
+A list takes one period span for all its accounts, from its first account: under `YTD`, a list that mixes balance sheet and income statement accounts adds part of itself over the wrong span. `FSN_L4_NIN`, `FSN_L4_RET` and `FSN_L4_CBP` add nothing inside a list, and no message says so. Keep each list to accounts of one statement, and give each `FSN_L4` code its own cell.
+
+Budgets work the same way. `FSN.BudgetAccountBalance(Subsidiary, Fiscal Year, Period, Period Range, Account, Budget Category, …)` takes account numbers, summary accounts, lists, and the `FSN_L1` to `FSN_L3` codes, plus `FSN_L4_NIN` on its own for budgeted net income. It doesn't accept the other `FSN_L4` codes or the `FSN_L0` codes. A budget list adds the accounts under every parent in it, parents that take postings included. One parent that takes postings, on its own, returns its own budget only. Give an actual and its budget the same accounts (`references/functions.md`, Budget functions).
 
 ## How reports are organized
 
@@ -68,6 +71,7 @@ Templates lay reports out this way, and a report you build should too: account r
 | To change a report they already have | *Change an existing report* |
 | A model: a department P&L, budget vs actual by department or location, trailing twelve months, a KPI or board summary, several subsidiaries side by side | *Build a model*, starting from a template where one fits |
 | Live formulas in place of hard-coded numbers in a spreadsheet or NetSuite export | `references/converting.md` |
+| The transaction lines behind a balance, a breakdown by segment, period or account, A/R or A/P aging, or the rows of a SuiteQL query, saved search or dataset, in a sheet that refreshes | The drilldown and data query functions in `references/functions.md` |
 
 The user clicks Finsyte's ribbon commands: templates, Load Accounts, and dropdowns. When a step needs one, tell the user exactly which command to use, then work with the sheet it produces.
 
@@ -96,7 +100,7 @@ Templates are starting points. They match the layout and groupings of the same r
 Models combine the same pieces. Worked patterns with formulas are in `references/model-building.md`.
 
 - **One set of inputs.** Put Subsidiary, Fiscal Year, Period, Period Range, Budget Category, and Book in labeled parameter cells, on a Drivers tab when several sheets share them, so one change re-points the whole model.
-- **Dropdowns on the inputs.** The user selects the input cells, then Finsyte ribbon › Data Retrieval › Dropdowns › the list: Account, Subsidiary, Fiscal Year, Period Numbers, Period Range, Budget Category, Accounting Book, Currency, Item, Class, Department, Location, Entity, Transaction Type, or a custom segment. A dropdown keeps an input to values NetSuite accepts.
+- **Dropdowns on the inputs.** The user selects the input cells, then Finsyte ribbon › Data Retrieval › Dropdowns › the list: Account, Subsidiary, Fiscal Year, Period Numbers, Period Range, Budget Category, Accounting Book, Currency, Item, Class, Department, Location, Entity, Transaction Type, or a custom segment. A dropdown keeps an input to values NetSuite accepts. You can't click the ribbon yourself: ask the user to, or build the dropdown from a Finsyte list on a lists sheet (`references/model-building.md`, Dropdowns).
 - **Rows and columns from NetSuite lists.** Range functions spill lists that grow with NetSuite: `FSN.Range.Departments` with Horizontal set to TRUE for a column per department, `FSN.Range.Subsidiaries` for a column per entity, `FSN.Range.AccountNumbers` for account rows. Value formulas reference the header or row cell.
 - **Summary lines from codes.** Revenue, cost of goods sold, operating expense, and net income come straight from `FSN_L3_INC`, `FSN_L3_COG`, `FSN_L3_EXP`, and `FSN_L4_NIN`, so a summary or board page needs no account list.
 - **Comparisons are parameters.** Actual, budget, and prior year are the same account read with a different function or a different Fiscal Year cell.
@@ -134,7 +138,7 @@ When a workbook you change or convert already has a volatile input that Finsyte 
 
 ### One Finsyte call per cell, with nothing around it but a minus
 
-Write one `FSN.` call per cell. Never nest it in another `FSN.` call or wrap it in `IF`, `IFERROR`, `SUM`, or any other function. A leading `-` for sign is the one exception; it's what Finsyte's Switch Sign writes. Finsyte caches each call, and the right-click menu (Drill Down, Switch Sign, Go to Budget) only works on an unwrapped call. Put `IF` or `IFERROR` in a separate cell that references the call.
+Write one `FSN.` call per cell. Never nest it in another `FSN.` call or wrap it in `IF`, `IFERROR`, `SUM`, or any other function. A leading `-` for sign is the one exception; it's what Finsyte's Switch Sign writes. Finsyte caches each call, Store Values on Open saves the values of one-call cells only, and the right-click menu (Drill Down, Switch Sign, Go to Budget) only works on an unwrapped call. Put `IF` or `IFERROR` in a separate cell that references the call.
 
 ### Totals use `AGGREGATE(9,0,range)`, never `SUM`
 
@@ -145,7 +149,7 @@ Write subtotal and total rows as `=AGGREGATE(9,0,<range>)`. Function 9 sums, and
 
 ### Several values, or no value
 
-The Account, Class, Department, Location, Item, Entity, and custom segment arguments accept several values: a `^` string (`4000^4010`), a cell range, or a named range, which is best for a list reused across sheets. `FSN_L4_NIN` and `FSN_L4_RET` are calculations, not account rollups, so they can't be combined with other accounts in any of these forms; give each its own cell.
+The Account, Class, Department, Location, Item, Entity, and custom segment arguments accept several values: a `^` string (`4000^4010`), a cell range, or a named range, which is best for a list reused across sheets. `FSN_L4_NIN`, `FSN_L4_RET` and `FSN_L4_CBP` are calculations: in any of these forms they add nothing, with no message, so give each its own cell.
 
 For a segment, blank and `<None>` mean different things:
 
@@ -198,18 +202,20 @@ A balance sheet uses `YTD`; an income statement matches its span: `PTD` for a mo
 
 Arguments are in order; `*` marks a required one. Full tables, defaults, and the Range function arguments are in `references/functions.md`.
 
-- `FSN.GLAccountBalance(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, Book, Item, Class, Department, Location, Entity, TransactionType, Posted, Currency, CustomSegments…)`: the main function; see *How Finsyte gets a number*. Book defaults to 1, Posted to `P` (`NP` is non-posted), and Currency to the subsidiary's.
-- `FSN.GLAccountDebitBalance(…)`, `FSN.GLAccountCreditBalance(…)`: the same arguments, one side only.
-- `FSN.BudgetAccountBalance(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, BudgetCategory*, Book, Item, Class, Department, Location, Entity)`: budget amounts. A blank segment combines all of its values.
-- `FSN.BudgetNetIncome(Subsidiary, FiscalYear*, Period*, PeriodRange*, BudgetCategory*, Book, Item, Class, Department, Location, Entity)`: budgeted net income. There is no `FSN.BudgetAccountNetIncome`; it returns `#NAME?`.
-- `FSN.StatAccountAmount(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, Reserved, Reserved, Class, Department, Location, Entity)`: statistical accounts. `FSN.GLAccountBalance` with a statistical account returns the same amount.
-- `FSN.GLItemQuantity(…)`, `FSN.GLItemUnit(…)`: the same arguments as `GLAccountBalance` except Currency, so custom segments start at the 14th; item quantity and unit of measure.
+- `FSN.GLAccountBalance(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, Book, Item, Class, Department, Location, Entity, TransactionType, Posted, Currency, CustomSegments…)`: the main function; see *How Finsyte gets a number*. A blank Book is the primary book, Posted defaults to `P` (`NP` is non-posted), and Currency to the subsidiary's. A subsidiary's amounts convert only into its own currency or a parent subsidiary's currency, because NetSuite's consolidated exchange rates run from a subsidiary to its parents: any other currency returns `Invalid Currency`, or `Error` on older Finsyte versions.
+- `FSN.GLAccountDebitBalance(…)`, `FSN.GLAccountCreditBalance(…)`: the same arguments, one side only. They refuse the `FSN_L0` and `FSN_L4` codes.
+- `FSN.GLAccountSummaryBalance(…)`: the same arguments; an account together with every account under it, for a parent that takes postings (*How Finsyte gets a number*).
+- `FSN.BudgetAccountBalance(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, BudgetCategory, Book, Item, Class, Department, Location, Entity)`: budget amounts. A blank segment combines all of its values. A blank Budget Category reads the Legacy category, or the company's first category, so always fill it in.
+- `FSN.BudgetNetIncome(Subsidiary, FiscalYear*, Period*, PeriodRange*, BudgetCategory, Book, Item, Class, Department, Location, Entity)`: budgeted net income. There is no `FSN.BudgetAccountNetIncome`; it returns `#NAME?`.
+- `FSN.StatAccountAmount(Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, Reserved, Reserved, Class, Department, Location, Entity)`: statistical accounts. `FSN.GLAccountBalance` with a statistical account returns the same amount and ignores Book, Item, Transaction Type, Posted, Currency and the custom segments.
+- `FSN.GLItemQuantity(…)`, `FSN.GLItemUnit(…)`: the same arguments as `GLAccountBalance` except Currency, so custom segments start at the 14th; item quantity and unit of measure. One posting account per cell: a list or an `FSN_` code returns a message.
 - `FSN.GLAccountName(Account*, Prefix, Suffix)`
 - `FSN.GetListInfo(ListName*, Identifier*, Property*, Prefix, Suffix)`: a column of a Finsyte list, such as `AccountType`, `AccountCategory`, or `Parent` from `GL Accounts`. `FSN.GetParentListInfo` returns the value one level up.
-- `FSN.GetPeriodName(Period*, FiscalYear*, Subsidiary)`, `FSN.PeriodToDate(FiscalYear*, Period*, Side)` (format the cell as a date), `FSN.DateToPeriod(Date*, PeriodType, Subsidiary)`.
-- `FSN.SubHasAccess(Subsidiary*, ListName*, Identifier*)`, `FSN.CurrencyName(Subsidiary*, BudgetCategory)`, `FSN.LastDataRefresh(Source)`.
-- `FSN.Range.*`: lists that spill, including `AccountNumbers`, `Accounts`, `Subsidiaries`, `Departments`, `Classifications`, `Locations`, `Items`, `Entities`, `Customers`, `Vendors`, `Employees`, `Projects`, `BudgetCategories`, and `CustomSegments`. `AccountNumbers` and the segment lists take different argument orders (`references/functions.md`).
-- `FSN.Query(SuiteQL*, OmitHeader, Skip, Take)`, `FSN.SavedSearch(SearchName*, OmitHeader, Skip, Take)`, `FSN.Dataset(DatasetId*, OmitHeader, Skip, Take)`: tables that spill. Saved searches need the Finsyte SuiteApp, which an administrator deploys once from Help › Preferences › SuiteApp Deploy.
+- `FSN.GetPeriodName(Period*, FiscalYear*, Subsidiary)`, `FSN.PeriodToDate(FiscalYear*, Period*, Side)` (format the cell as a date; it reads the top-level subsidiary's calendar), `FSN.DateToPeriod(Date*, PeriodType, Subsidiary)`.
+- `FSN.SubHasAccess(Subsidiary*, ListName*, Identifier*)` (the text `True` or `False`), `FSN.CurrencyName(Subsidiary*, BudgetCategory)`, `FSN.LastDataRefresh(Source)`.
+- `FSN.Range.*`: lists that spill, including `AccountNumbers`, `Accounts`, `Subsidiaries`, `Departments`, `Classifications`, `Locations`, `Items`, `Entities`, `Customers`, `Vendors`, `Employees`, `Projects`, `BudgetCategories`, `CustomSegments`, the other entity lists, and the lists behind Finsyte's dropdowns, such as `Periods.FY`, `PeriodNumbers`, `PeriodRanges`, `AccountingBooks` and `Currencies`. `AccountNumbers` and the segment lists take different argument orders (`references/functions.md`).
+- `FSN.Query(SuiteQL*, OmitHeader, Skip, Take)`, `FSN.SavedSearch(SearchName*, OmitHeader, Skip, Take)`, `FSN.Dataset(DatasetId*, OmitHeader, Skip, Take)`: tables that spill. `FSN.Query` and `FSN.Dataset` write every cell as text, numbers included, so `SUM` over their output returns 0: convert a column with `VALUE` before you total it (`references/functions.md`). `FSN.SavedSearch` returns numbers and dates. Saved searches need the Finsyte SuiteApp, which an administrator deploys once from Help › Preferences › SuiteApp Deploy.
+- `FSN.TransactionLineDrilldown(BalanceType, Subsidiary, FiscalYear*, Period*, PeriodRange*, Account*, …)`, `FSN.SegmentDrilldown(Segment*, BalanceType, Subsidiary, …)`, `FSN.AgingSummary(Subsidiary, …)`: the right-click drilldowns as formulas that spill and refresh with their parameter cells: the transaction lines behind a balance, the balance broken down by a segment, period or account, and the A/R or A/P aging by customer or vendor. After their own leading arguments they take the arguments of `GLAccountBalance` (`references/functions.md`, Drilldown functions).
 
 Use `FSN.GLAccountBalance` with a code instead of `FSN.GLAccountNetIncome`, `FSN.GLAccountRetainedEarnings`, `FSN.GLAccountTypeBalance`, `FSN.GLAccountGroupBalance`, `FSN.GLAccountCategoryBalance`, and `FSN.CashAtBeginningOfPeriod`. The first five still calculate but are hidden from Excel's function list, and one function keeps every balance cell in the same shape.
 
@@ -221,7 +227,9 @@ One comma off silently filters on the wrong segment. Count against this table:
 
 | Function | Book | Item | Class | Department | Location | Entity |
 |---|---|---|---|---|---|---|
-| `GLAccountBalance`, Debit/Credit, `GLItemQuantity`, `GLItemUnit` | 6 | 7 | 8 | 9 | 10 | 11 |
+| `GLAccountBalance`, Debit/Credit, `GLItemQuantity`, `GLItemUnit`, `AgingSummary` | 6 | 7 | 8 | 9 | 10 | 11 |
+| `TransactionLineDrilldown` | 7 | 8 | 9 | 10 | 11 | 12 |
+| `SegmentDrilldown` | 8 | 9 | 10 | 11 | 12 | 13 |
 | `BudgetAccountBalance` | 7 | 8 | 9 | 10 | 11 | 12 |
 | `BudgetNetIncome` | 6 | 7 | 8 | 9 | 10 | 11 |
 | `StatAccountAmount` | — | — | 8 | 9 | 10 | 11 |
@@ -243,7 +251,7 @@ A report with a fixed list of account rows goes stale silently. A GL account add
 
 The check doesn't suit the Cash Flow templates, which leave out Bank accounts and Undeposited Funds by design.
 
-**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, the accounts NetSuite adds later included, so those accounts need no check. The Exclude Filter removes only the accounts it names, so a check that includes them lists them all. Put in the Include Filter cell only the parts of the chart the report lists account by account: the codes of those types, or the parent accounts of those accounts, joined with `^`. On a P&L whose revenue lists its accounts and whose cost of sales and operating expenses are code rows, the Include Filter cell holds `FSN_L3_INC`.
+**Rows that hold a code or a summary account.** A row that holds an `FSN_` code, or a summary account whose posting accounts have no rows of their own, counts every account under it, the accounts NetSuite adds later included, so those accounts need no check. A parent read with `FSN.GLAccountSummaryBalance` counts the same way. The Exclude Filter removes only the accounts it names, so a check that includes them lists them all. Put in the Include Filter cell only the parts of the chart the report lists account by account: the codes of those types, or the parent accounts of those accounts, joined with `^`. On a P&L whose revenue lists its accounts and whose cost of sales and operating expenses are code rows, the Include Filter cell holds `FSN_L3_INC`.
 
 It returns one blank cell when nothing is missing and spills the missing account numbers otherwise. Put a flag beside it (here the check is in `$Z$220`):
 
@@ -251,7 +259,7 @@ It returns one blank cell when nothing is missing and spills the missing account
 =IF(COUNTA($Z$220#)=COUNTBLANK($Z$220#), "✓ All accounts present", "⚠ Missing accounts — see below")
 ```
 
-`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula. An account that a code row or a summary account row counts gets no row of its own: the total would count the account twice.
+`COUNTA` counts the empty result `""` as 1, so compare it with `COUNTBLANK` rather than with zero. Add each missing account to its type's group by copying a neighboring row's formula. An account that a code row or a summary account row counts gets no row of its own: the total would count the account twice. The check also reads complete while Finsyte is signed out, because `FSN.Range.AccountNumbers` then returns one blank cell: read it with values on the sheet.
 
 ---
 
@@ -261,11 +269,13 @@ It returns one blank cell when nothing is missing and spills the missing account
 2. **Wait for `#GETTING_DATA` to clear.** Finsyte pulls asynchronously. Values read while any cell shows `#GETTING_DATA` are partial, and a total that looks wrong mid-refresh is almost never a wrong code. Don't swap codes to fix it.
 3. **Never guess account numbers.** A number that doesn't exist returns `Invalid account number`. Take numbers from `FSN.Range.AccountNumbers` or from the user's sheet.
 4. **`#SPILL!`.** Range functions, `Query`, `SavedSearch`, and `Dataset` spill, so leave room. An empty result is one blank cell.
-5. **Summary accounts in a flat list.** `FSN.Range.AccountNumbers` returns parent accounts with their children, and a parent's balance already includes its children. For a flat list totaled with `AGGREGATE`, set Posting Only (the 9th argument) to TRUE.
+5. **Summary accounts in a flat list.** `FSN.Range.AccountNumbers` returns summary accounts with the accounts under them, and a summary account's balance already includes those accounts. For a flat list totaled with `AGGREGATE`, set Posting Only (the 9th argument) to TRUE. A parent that takes postings stays in that list and returns its own postings only, so it counts nothing twice.
 6. **Rollup entries in segment lists.** `FSN.Range.Departments`, `.Classifications`, and `.Locations` include a `Parent (Hierarchy)` entry for each parent by default, which overlaps its children. For one column per department, set Include Rollup (the 7th argument) to FALSE.
-7. **Subsidiary access.** Not every account is available to every subsidiary; `FSN.SubHasAccess` checks.
-8. **Custom segments** appear in functions and dropdowns only after they are set up in Help › Preferences › Custom Segments and Excel is restarted.
-9. **What the user can do from Finsyte's menus.** Finsyte ribbon › Refresh Data offers Entire Workbook, Current Sheet, List Data, Purge Function Cache, and Data Connections. Right-clicking a Finsyte value offers Refresh Selection, Drill Down (to transactions, segments, subsidiaries, or periods), Switch Sign, Go to Budget, Static Snapshot Selection, and A/R or A/P Aging.
+7. **Subsidiary access.** Not every account is available to every subsidiary; `FSN.SubHasAccess` checks. It returns the text `True` or `False`, so a test of it compares text, such as `=IF(D5="True",…)` in a separate cell.
+8. **Custom segments** appear as function arguments and template parameter rows after they are added to Segments Used in Help › Preferences › Custom Segments and Excel restarts. The Dropdowns › Custom Segments menu lists every active segment.
+9. **What the user can do from Finsyte's menus.** Finsyte ribbon › Refresh Data offers Entire Workbook, Current Sheet, List Data, Purge Function Cache, and Data Connections. Right-clicking a Finsyte value offers Refresh Selection, Drill Down (Transaction Lines, Journal Entry Lines, Base Accounts, each segment, Subsidiary, Transaction Type, Entity, Item, or Period), Switch Sign, Go to Budget on budget cells, Static Snapshot Selection, A/R Aging Summary or A/P Aging Summary on A/R or A/P balances, and Open in NetSuite on drilldown rows.
+10. **Paused or signed out.** The Finsyte ribbon button in the Refresh group reads Pause Connection while Finsyte runs and Resume Connection while it is paused. A paused Finsyte shows 0 in every numeric cell it holds no value in memory for, closed periods from the Summary Cache included, and one empty cell for the query, saved search and drilldown functions; the account and segment lists keep working. Help › Preferences › General › Pause Connection on Open pauses every workbook as it opens. Signed out, numeric cells show empty text, and a cell with a leading minus shows `#VALUE!`. A sheet of zeros or empty text holds no real values: ask the user what the button reads, then Resume Connection or sign in, and Refresh Data › Entire Workbook.
+11. **Finsyte messages.** `references/functions.md`, Messages, gives the cause and the fix of each message a Finsyte cell can show, such as `Invalid period number specified`, `Invalid Book Name` or `This account number is not supported for this function`.
 
 ---
 
@@ -284,8 +294,8 @@ A multi-page board of directors package, with a cover, an index, and statements 
 Run these before handing over any report or model. Each one is pass or fail.
 
 1. **Inputs evaluate.** No `#VALUE!` from parameter cells, and Period reads as a number.
-2. **Pulls have settled.** No `#GETTING_DATA`, and key totals tie to NetSuite in magnitude and sign for one period.
-3. **Nothing made up.** No `#NAME?` (such as `BudgetAccountNetIncome`), no `Invalid account number`, no invented `FSN_` codes.
+2. **Pulls have settled on live values.** No `#GETTING_DATA`, no sheet of zeros or empty text from a paused or signed-out Finsyte (Gotcha 10), and key totals tie to NetSuite in magnitude and sign for one period.
+3. **Nothing made up.** No `#NAME?` (such as `BudgetAccountNetIncome`), no `Invalid account number` or other Finsyte message, no invented `FSN_` codes.
 4. **Signs are right.** Credit-normal actuals negated once; budgets and CTA never negated; template rows not negated a second time.
 5. **Formulas you wrote follow the conventions.** No literals inside calls, Subsidiary filled in, one call per cell with nothing around it but `-`, totals as `AGGREGATE(9,0,…)`, and no line item written as an `AGGREGATE`. Finsyte's own template formulas are exempt.
 6. **No volatile inputs.** No Finsyte call reads a cell that depends on `TODAY`, `NOW`, `OFFSET`, `INDIRECT`, `CELL`, `INFO`, `SHEET`, `SHEETS`, `RAND`, `RANDBETWEEN`, `RANDARRAY`, or a `SUMIF` with ranges of different sizes.

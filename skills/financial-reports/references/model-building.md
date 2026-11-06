@@ -18,7 +18,7 @@ Read this when building a model rather than a single standard statement: a workb
 To make a whole workbook recompute from one place, drive every sheet from one inputs tab rather than setting parameters statement by statement.
 
 1. **Create a Drivers sheet** as the first tab. Put the shared inputs in labeled cells: Subsidiary, Current Fiscal Year, Prior Fiscal Year, Period, Period Range, Budget Category, and Book if it isn't the primary book. Give the input cells Finsyte dropdowns (*Dropdowns* below). Inputs are typed values or relative periods; never derive one from `TODAY`, `OFFSET`, `INDIRECT`, or `CELL` (SKILL.md, *Inputs are never volatile*).
-2. **Name the inputs** (`CurrentFY`, `PriorFY`, `Subsidiary`) so formulas read clearly. Derive year labels from the input, for example `=VALUE(RIGHT(TRIM(CurrentFY),4))` for the year as a number, then `="FY "&(year-1)` for the prior year.
+2. **Name the inputs** (`CurrentFY`, `PriorFY`, `Subsidiary`) so formulas read clearly. Take the prior fiscal year from Finsyte's fiscal year list, which holds the company's own fiscal year names, such as `FY 2025-26`. With `=FSN.Range.Periods.FY(FALSE,FALSE)` spilled in `Lists!A2`, latest first, `PriorFY` is the entry below `CurrentFY`: `=LET(y,IFERROR(INDEX(Lists!$A$2#,MATCH(CurrentFY,Lists!$A$2#,0)+1),""),IF(LEFT(y,1)="<","",y))`. The `LEFT` test drops the relative values, such as `<Current>`, that follow the years while the Relative Periods preference shows them. Labels read these names: arithmetic on a name, such as `="FY "&(year-1)`, breaks for fiscal years named another way.
 3. **Point every sheet's parameter cells at the Drivers cells.** Template parameter cells can be Text-formatted (the Period cell is, on every template except Balance Sheet, Cash Flow, and Comparative Cash Flow); set each to General before entering the reference, or it stores the formula as text and its dependents return `#VALUE!`.
 4. **Drive every label from the inputs too.** Titles, subtitles, column headers, chart titles, and axis labels are easy to hard-code and forget:
    - Titles: `=Drivers!$C$4&" Board Summary | "&Drivers!$C$5`
@@ -41,6 +41,21 @@ Finsyte keeps each list on a hidden sheet whose name begins `FinsyteNS.` and poi
 
 If you are building the workbook yourself and can't use the ribbon, you can make an equivalent list: put a Range function on a lists sheet, for example `=FSN.Range.Departments(,,$B$2)` in `Lists!A2`, and set the input cell's data validation to List with the source `=Lists!$A$2#`. Prefer the ribbon when the user can click it.
 
+The Finsyte list for each input (`references/functions.md`, Lists for dropdowns):
+
+| Input | List |
+|---|---|
+| Subsidiary | `=FSN.Range.Subsidiaries()` |
+| Fiscal Year | `=FSN.Range.Periods.FY(FALSE,FALSE)` |
+| Period | `=FSN.Range.PeriodNumbers()` |
+| Period Range | `=FSN.Range.PeriodRanges()` |
+| Accounting Book | `=FSN.Range.AccountingBooks()` |
+| Budget Category | `=FSN.Range.BudgetCategories()` |
+| Currency | `=FSN.Range.Currencies()` |
+| Transaction Type | `=FSN.Range.TransactionTypes()` |
+| Department, Class, Location | `=FSN.Range.Departments(,,<Subsidiary cell>)`, `.Classifications`, `.Locations` |
+| Account | `=FSN.Range.Accounts()` |
+
 ---
 
 ## Columns from a NetSuite list
@@ -62,7 +77,7 @@ C12:  =FSN.GLAccountBalance($B$2,$B$3,$B$4,$B$5,$A12,,,,C$9)
 
 **The value grid doesn't grow by itself.** When a department is added in NetSuite, the header spills one more column, but no value formulas sit under it. Don't pre-fill spare columns: a blank header passes a blank Department, which returns the all-department total. Instead, add a check cell, for example `=IF(COUNTA($C$9#)=<number of department columns>, "✓ Columns complete", "⚠ New department: copy the last column across")`, and tell the user what it means.
 
-**Subsidiary columns:** `=FSN.Range.Subsidiaries(,,,,,,TRUE)` spills across (Horizontal is the 7th argument; this function has no Subsidiary or Include Blank argument), and each value formula takes its Subsidiary from the header: `=FSN.GLAccountBalance(C$9,$B$3,$B$4,$B$5,$A12)`. The list adds a consolidated entry, such as `Headquarters (Consolidated)`, for each parent subsidiary; use the Include and Exclude filters to keep the ones the report needs. Each subsidiary returns amounts in its own currency, so columns in different currencies don't add up; use the consolidated subsidiary for a total.
+**Subsidiary columns:** `=FSN.Range.Subsidiaries(,,,,,,TRUE)` spills across (Horizontal is the 7th argument; this function has no Subsidiary or Include Blank argument), and each value formula takes its Subsidiary from the header: `=FSN.GLAccountBalance(C$9,$B$3,$B$4,$B$5,$A12)`. The list adds a consolidated entry, such as `Headquarters (Consolidated)`, for each parent subsidiary; use the Include and Exclude filters to keep the ones the report needs. Each subsidiary returns amounts in its own currency. To make the columns add up, put the parent's currency in a parameter cell, such as `=FSN.CurrencyName($B$2)` in `$B$7` with the consolidated subsidiary in `$B$2`, and pass it as Currency, the 14th argument: `=FSN.GLAccountBalance(C$9,$B$3,$B$4,$B$5,$A12,,,,,,,,,$B$7)`. NetSuite translates a subsidiary into its own currency or a parent's currency only, so the top parent's currency works for every column under it. With the members and the elimination subsidiary as columns and the `(Consolidated)` entries left out, the columns add up to the consolidated total.
 
 ---
 
@@ -80,6 +95,7 @@ Start from the Budget vs Actual template when the layout fits. To build one, or 
 - **Net income:** with `FSN_L4_NIN` in `$B$7`, actual is `=-FSN.GLAccountBalance($B$2,$B$3,$B$4,$B$5,$B$7)` and budget is `=FSN.BudgetAccountBalance($B$2,$B$3,$B$4,$B$5,$B$7,$B$6)`. `=FSN.BudgetNetIncome($B$2,$B$3,$B$4,$B$5,$B$6)` returns the same budget figure. There is no `FSN.BudgetAccountNetIncome`.
 - **By department or location:** the segment positions differ between the two functions. Department is the 9th argument of `GLAccountBalance` and the 10th of `BudgetAccountBalance`, because Budget Category sits in the 6th slot.
 - **Several budgets:** each Budget Category (for example Board Approved and Reforecast) is its own column with its own parameter cell.
+- **A parent account that takes postings:** the actual is `FSN.GLAccountSummaryBalance` on the parent, and the budget is the parent and its children as a list; or each account gets a row in both columns (`references/functions.md`, Budget functions).
 - Right-click a budget value › Go to Budget opens that budget in NetSuite.
 
 ---
@@ -91,7 +107,7 @@ Start from the Budget vs Actual template when the layout fits. To build one, or 
 **A column per month:** each column is `PTD` and reads its own Period and Fiscal Year from two helper rows above the headers.
 
 - **For a rolling trend**, put `<Current - 11>`, `<Current - 10>`, … `<Current>` in the Period row. A relative Period sets its own fiscal year and wraps at year end, so the Fiscal Year row can simply reference the Drivers input.
-- **For a trend that ends at a fixed period**, compute each column from the end period and year. With the end period in `$B$4`, the end year as a number in `$B$8`, and `k` the column's position from 1 to 12 (`COLUMNS($C$7:C7)` in the first month's column): Period `=IF($B$4-12+k<=0, $B$4+k, $B$4-12+k)` and Fiscal Year `="FY "&IF($B$4-12+k<=0, $B$8-1, $B$8)`. This assumes twelve periods a year; adjust it if the company uses a thirteenth adjustment period.
+- **For a trend that ends at a fixed period**, compute each column from the end period and the Drivers fiscal years. With the end period in `$B$4` and `k` the column's position from 1 to 12 (`COLUMNS($C$7:C7)` in the first month's column): Period `=IF($B$4-12+k<=0, $B$4+k, $B$4-12+k)` and Fiscal Year `=IF($B$4-12+k<=0, PriorFY, CurrentFY)`, with `PriorFY` from the fiscal year list (*Drivers tab*). This assumes twelve periods a year; adjust it for a company with a thirteenth adjustment period.
 - **Headers:** `=FSN.GetPeriodName(C$7, C$6, $B$2)` in the header row, its own cell per column.
 - **Balance sheet trends** use `YTD` in each column, which gives the closing balance for that month.
 
