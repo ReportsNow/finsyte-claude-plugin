@@ -21,17 +21,20 @@ A hidden sheet named `Lists`. Row 1 holds headings; each list spills down from r
 | A | Subsidiaries | `=FSN.Range.Subsidiaries(,,,FALSE)` | `ListSubsidiaries` |
 | B | Subsidiaries, not consolidated | `=FSN.Range.Subsidiaries(,,,FALSE,FALSE)` | `ListSubsidiaryMembers` |
 | C | Accounting books | `=FSN.Range.AccountingBooks()` | `ListBooks` |
-| D | Currencies | `=FSN.Range.Currencies()` | `ListCurrencies` |
+| D | Reporting currencies | Typed after the subsidiary tree: the subsidiary's own currency, then the currency of each parent above it, each currency once (`references/excel-mechanics.md`, "Currency symbols") | `ListReportCurrencies` |
 | E | Fiscal years, latest first | `=FSN.Range.Periods.FY(FALSE,FALSE)` | `ListFiscalYears` |
 | F | Budget categories | `=FSN.Range.BudgetCategories()` | `ListBudgetCategories` |
 | G | Departments | `=FSN.Range.Departments(,,Subsidiary,FALSE,,FALSE)` | `ListDepartments` |
 | H | Classes | `=FSN.Range.Classifications(,,Subsidiary,FALSE,,FALSE)` | `ListClasses` |
 | I | Locations | `=FSN.Range.Locations(,,Subsidiary,FALSE,,FALSE)` | `ListLocations` |
 | J | Periods | `=SEQUENCE(PeriodsPerYear)` | `ListPeriods` |
+| K | Currency symbols | Typed: the display symbol of the currency beside it in D | `ListCurrencySymbols` |
 
-Each name refers to the spill, such as `=Lists!$A$2#`. Include Inactive is typed `FALSE` in A, B and G to I: left blank, it follows each user's Preferences setting for inactive items in dropdowns, and the book's lists would differ from user to user. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it; column J reads the periods per year, so write it after Inputs C34 holds them. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
+Each name refers to the spill, such as `=Lists!$A$2#`; the names of D and K cover the rows filled in D. Include Inactive is typed `FALSE` in A, B and G to I: left blank, it follows each user's Preferences setting for inactive items in dropdowns, and the book's lists would differ from user to user. Columns G to I read the book's subsidiary, so write them after Inputs C5 holds it; column J reads the periods per year, so write it after Inputs C34 holds them. Leave out a segment column when the NetSuite account doesn't use the segment. The department, class and location lists include the `Parent (Hierarchy)` entries, so the user can pick a parent and its children as one column.
 
-Columns from K are the discovery area while you build (`references/excel-mechanics.md`, "Discovery"). Clear it when the book is built.
+**CurrencySymbol** is a workbook name that holds a formula: `context.workbook.names.add("CurrencySymbol", '=IFERROR(INDEX(ListCurrencySymbols,MATCH(ReportCurrency,ListReportCurrencies,0)),"")')`, added after `ReportCurrency`. It gives the symbol of the currency in Inputs C8 to the `$ Change` and `$ Variance` headings and to the currency formats (`references/pages.md`, "Number formats").
+
+Columns from L are the discovery area while you build (`references/excel-mechanics.md`, "Discovery"). Clear it when the book is built.
 
 ---
 
@@ -48,7 +51,7 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 5 | Subsidiary | Typed | `Subsidiary` | `ListSubsidiaries` |
 | 6 | Scope | `=IF(ISNUMBER(SEARCH("(Consolidated)",C5)),"Consolidated","Subsidiary")` | `Scope` | |
 | 7 | Accounting book | Typed | `Book` | `ListBooks` |
-| 8 | Reporting currency | `=FSN.CurrencyName(Subsidiary)`, colored as a typed input: it follows the subsidiary until the user picks a parent subsidiary's currency, the one other choice NetSuite can translate into (`references/interview.md`, round 1) | `ReportCurrency` | `ListCurrencies` |
+| 8 | Reporting currency | `=FSN.CurrencyName(Subsidiary)`, colored as a typed input: it follows the subsidiary until the user picks a parent subsidiary's currency from the dropdown, the one other choice NetSuite can translate into (`references/interview.md`, round 1) | `ReportCurrency` | `ListReportCurrencies` |
 | 9 | **Periods** | | | |
 | 10 | Current year | `=YEAR(C17)`, format `0` | `CurYear` | |
 | 11 | Current fiscal year | Typed, such as `FY 2025` | `CurFY` | `ListFiscalYears` |
@@ -67,7 +70,7 @@ E1 holds "Return to Index", a link to `Index!A1`.
 | 24 | Budget category | Typed; empty when the book has no budget pages | `BudgetCat` | `ListBudgetCategories` |
 | 25 | Period range: inception to date | `ITD` | `RangeITD` | |
 | 26 | **Materiality** | | | |
-| 27 | Materiality amount | Typed, default `50000`, format `"$"#,##0` | `MatAmt` | |
+| 27 | Materiality amount | Typed, default `50000`, format `"<s>"#,##0`, where `<s>` is the symbol in Lists K2 (`#,##0" <s>"` for a symbol after the amount, `#,##0` with K empty), and the currency formats of the pages (`references/pages.md`, "Number formats") | `MatAmt` | |
 | 28 | Materiality percentage | Typed, default `10%`, format `0.0%` | `MatPct` | |
 | 29 | Book checks | `=IFERROR(IF(COUNTIF(<G>,"OK")+COUNTIF(<G>,"Review")<<pages>,"Error",IF(COUNTIF(<G>,"Review")>0,"Review","OK")),"Error")`, where `<G>` is `Index!$G$5:$G$<last page row>` and `<pages>` the number of report pages, so a page whose status can't be read counts as Error; with the status colors of the checks | `BookChecks` | |
 | 30 | **Refresh** | | | |
@@ -179,4 +182,4 @@ Column G is outside the print area: it shows the preparer each page's checks, an
 
 The pages and the front sheets use these workbook-level names. Before you build, check that the workbook has none of them and no sheet named Inputs, Cover, Index, Lists or a number (`references/excel-mechanics.md`, "Before you start").
 
-`Affiliates`, `Book`, `BookChecks`, `BudgetCat`, `CashExtraAccounts`, `ClassColumns`, `CompanyName`, `CovCY`, `CovMonth`, `CovMonthsWord`, `CovMQYLayout`, `CovPE`, `CovPElong`, `CovPEmd`, `CovPPE`, `CovPPElong`, `CovPQE`, `CovPQEmd`, `CovPY`, `CovQTDBasis`, `CovQTDPhrase`, `CovQTDPhrasePY`, `CovQtrName`, `CovRefresh`, `CovYTDBasis`, `CovYTDLayout`, `CovYTDPhrase`, `CovYTDPhrasePY`, `CurFY`, `CurYear`, `DepartmentColumns`, `FooterText`, `IntercompanyAccounts`, `ListBooks`, `ListBudgetCategories`, `ListClasses`, `ListCurrencies`, `ListDepartments`, `ListFiscalYears`, `ListLocations`, `ListSubsidiaries`, `ListSubsidiaryMembers`, `LocationColumns`, `MatAmt`, `MatPct`, `MonthNames`, `Period`, `PeriodEnd`, `PeriodsPerYear`, `PriorFY`, `PriorFY2`, `PriorFY3`, `PriorFY4`, `PriorPeriodEnd`, `PriorQtrEnd`, `PriorQtrPeriod`, `PriorYear`, `Quarter`, `RangeBSMove`, `RangeITD`, `RangeMTD`, `RangeQTD`, `RangeYTD`, `RefreshTime`, `ReportCurrency`, `Scope`, `Subsidiary`, `SubsidiaryColumns`, `UnauditedText`.
+`Affiliates`, `Book`, `BookChecks`, `BudgetCat`, `CashExtraAccounts`, `ClassColumns`, `CompanyName`, `CovCY`, `CovMonth`, `CovMonthsWord`, `CovMQYLayout`, `CovPE`, `CovPElong`, `CovPEmd`, `CovPPE`, `CovPPElong`, `CovPQE`, `CovPQEmd`, `CovPY`, `CovQTDBasis`, `CovQTDPhrase`, `CovQTDPhrasePY`, `CovQtrName`, `CovRefresh`, `CovYTDBasis`, `CovYTDLayout`, `CovYTDPhrase`, `CovYTDPhrasePY`, `CurFY`, `CurrencySymbol`, `CurYear`, `DepartmentColumns`, `FooterText`, `IntercompanyAccounts`, `ListBooks`, `ListBudgetCategories`, `ListClasses`, `ListCurrencySymbols`, `ListDepartments`, `ListFiscalYears`, `ListLocations`, `ListReportCurrencies`, `ListSubsidiaries`, `ListSubsidiaryMembers`, `LocationColumns`, `MatAmt`, `MatPct`, `MonthNames`, `Period`, `PeriodEnd`, `PeriodsPerYear`, `PriorFY`, `PriorFY2`, `PriorFY3`, `PriorFY4`, `PriorPeriodEnd`, `PriorQtrEnd`, `PriorQtrPeriod`, `PriorYear`, `Quarter`, `RangeBSMove`, `RangeITD`, `RangeMTD`, `RangeQTD`, `RangeYTD`, `RefreshTime`, `ReportCurrency`, `Scope`, `Subsidiary`, `SubsidiaryColumns`, `UnauditedText`.

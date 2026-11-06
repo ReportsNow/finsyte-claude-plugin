@@ -36,7 +36,7 @@ Read NetSuite through Finsyte formulas that you write on the Lists sheet, wait f
 
 ### Before round 1
 
-Write the Lists columns A to F (`references/front-pages.md`, "Lists"). From them:
+Write the Lists columns A to C, E and F (`references/front-pages.md`, "Lists"). From them:
 
 - **Subsidiaries.** A OneWorld account lists its subsidiaries, and a parent with children also as `<name> (Consolidated)`. One entry and no `(Consolidated)` entries: a single company, so no consolidating pages.
 - **Fiscal years** in `ListFiscalYears`, latest first.
@@ -49,6 +49,8 @@ With the subsidiary, fiscal year and period on Inputs (C5, C11, C14), write the 
 **Periods per year.** For `n` from 1 to 14 in the discovery area: `=FSN.GetPeriodName(<n>,CurFY,Subsidiary)`, `=FSN.PeriodToDate(CurFY,<n>,"Start")` and `=FSN.PeriodToDate(CurFY,<n>)`. Past the year's last period, `FSN.GetPeriodName` returns `Invalid period number specified` and `FSN.PeriodToDate` returns `Incomplete parameters`: no period. A period is regular when it has a name and dates and doesn't start on the day the previous period ends. A period named `Adjust …`, or one whose start and end are the previous period's last day, is an adjustment period. The count of regular periods, usually 12, goes in Inputs C34 (`PeriodsPerYear`). When an adjustment period exists, compare `=-FSN.GLAccountBalance(Subsidiary,CurFY,<last regular period>,<"YTD">,<"FSN_L4_NIN">)` with the same call for the adjustment period's number, the period numbers typed and the range and code in heading cells; if they differ, the company posts year-end entries there (interview round 1).
 
 **Subsidiary tree.** For each entry of `ListSubsidiaryMembers` (Lists B): `=FSN.GetListInfo("Subsidiaries",<name>,"Id")`, `"Parent"`, `"IsElimination"`, `"FiscalCalendar"`, `"LegalName"`, and `=FSN.CurrencyName(<name>)`. The members of a consolidated subsidiary `X (Consolidated)` are `X` and every subsidiary whose `Parent` chain reaches `X`'s `Id`. Note the elimination subsidiaries, the members whose fiscal calendar differs from the book subsidiary's, and the currencies.
+
+**Currency symbols.** A heading cell holding `SELECT name, displaysymbol, BUILTIN.DF(symbolplacement) AS placement FROM currency WHERE isinactive = 'F'`, and below it `=FSN.Query(<that cell>)`. Finsyte returns the columns in alphabetical order of their names, `displaysymbol`, `name`, `placement`, so read each column by its header. Then write Lists D, the subsidiary's own currency and then the currency of each parent above it in the subsidiary tree, each currency once, and Lists K, the display symbol of each. Note the currencies whose `placement` is not `Before Number`: their symbol follows the amount. A message in place of the table: write D, leave K empty, and say in the plan that the amounts show no currency symbol, with the message. Symbols the user gives in reply go in K.
 
 **Segments.** Lists G to I. A list with one blank cell: the segment is unused for this subsidiary. Read the values, and which are `(Hierarchy)` rollups.
 
