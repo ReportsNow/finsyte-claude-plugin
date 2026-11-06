@@ -52,7 +52,7 @@ In each account row's value cells, write one call that reads the parameter cells
 
 - **Subtotals and totals** become `=AGGREGATE(9,0,<range>)` over the block they cover, never `SUM` and never the exported constant. A constant total stops tying the moment the data changes.
 - **Differences of totals,** such as Gross Profit or Operating Income, are plain arithmetic on the total cells.
-- **Net Income** on a balance sheet is `FSN.GLAccountBalance` with `FSN_L4_NIN` in a parameter cell, and **Retained Earnings** is the same with `FSN_L4_RET`. Each is its own call; neither can be combined with other accounts.
+- **Net Income** on a balance sheet is `FSN.GLAccountBalance` with `FSN_L4_NIN` in a parameter cell, and **Retained Earnings** is the same with `FSN_L4_RET`. Each is its own call: in a list with other accounts they add nothing.
 - **Cumulative Translation Adjustment** is four calls added with `+` and no sign flip; see below.
 
 ## 7. Tie out against the original
@@ -90,7 +90,7 @@ NetSuite's consolidated balance sheet shows Cumulative Translation Adjustment as
 3. **Add them in the CTA row with `+`:** `=$H$40+$H$41+$H$42+$H$43`. CTA is a line item inside Equity, so it must not be an `AGGREGATE`, or the Total Equity `AGGREGATE(9,0,…)` would skip it.
 
 - **No sign flip anywhere.** Add each value exactly as returned, and don't negate the result. This is an exception to negating equity lines: the calculation only works on the stored signs.
-- **Why four calls instead of one:** `FSN_L4_RET` and `FSN_L4_NIN` are calculations, not account rollups, so they can't be combined in a `^` list or a range. Separate cells also leave each part visible for the tie-out.
+- **Why four calls instead of one:** `FSN_L4_RET` and `FSN_L4_NIN` are calculations that add nothing in a `^` list or a range, and a list takes one period span for all its accounts. Separate cells also leave each part visible for the tie-out.
 - **Period Range:** use the balance sheet's own cell, `YTD`. Retained earnings is non-zero only under `YTD`, so any other range drops prior-year earnings and inflates CTA.
 - **Several columns:** build one set of four helper cells per column, each reading that column's parameters.
 - **Sanity check:** for a single-currency, non-consolidated subsidiary the four values net to zero. A non-zero result there usually means the pulls haven't settled or the four calls don't use identical parameters.

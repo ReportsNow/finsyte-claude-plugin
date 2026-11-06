@@ -19,7 +19,8 @@ A Finsyte skill added earlier from the Finsyte website, named finsyte-netsuite, 
 - Building models such as department and location P&Ls, budget vs actual, trailing twelve months, and KPI or board summaries, driven from one inputs tab with Finsyte dropdowns
 - Laying out rows and columns from NetSuite lists, so new departments, subsidiaries, and accounts show up on refresh
 - Replacing hard-coded numbers in a spreadsheet or NetSuite export with live Finsyte formulas, then tying every converted cell back to the original
-- Diagnosing `#VALUE!`, `#NAME?`, `Invalid account number`, `#GETTING_DATA`, `#SPILL!`, and sign errors in FSN formulas
+- Pulling the transaction lines, a breakdown by department, class, location or period, or the A/R or A/P aging behind a balance into a sheet that refreshes, with Finsyte's drilldown functions
+- Diagnosing `#VALUE!`, `#NAME?`, `Invalid account number` and other Finsyte messages, `#GETTING_DATA`, `#SPILL!`, and sign errors in FSN formulas
 - Running a health check on a whole workbook with the workbook-health-check skill: volatile inputs, FSN errors, report totals and missing accounts, whole-column references, and other things that make a workbook slow or wrong, with fixes made only after you confirm them
 - Building a board book with the board-book skill: questions about the entity, period, pages, and lines first, then a multi-page package that rolls forward by changing the period on one sheet
 - Adding a check that flags GL accounts created in NetSuite after a report was built, so totals don't go stale silently

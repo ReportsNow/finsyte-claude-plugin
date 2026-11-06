@@ -106,12 +106,14 @@ Change columns are arithmetic on the value cells of the same row. `% Change` and
 | Use | Format |
 |---|---|
 | Amount | `_(* #,##0_);_(* \(#,##0\);_(* "–"_);_(@_)` |
-| Amount with $ | `_("$"* #,##0_);_("$"* \(#,##0\);_("$"* "–"_);_(@_)` |
+| Amount with $ | `_("$"* #,##0_);_("$"* \(#,##0\);_("$"* "–"_);_(@_)`, with the reporting currency's symbol in place of `$` (below) |
 | Percent | `0.0%;\(0.0%\);"–"` |
 | Ratio | `0.00"x";\(0.00"x"\);"–"` |
 | Heading year | `0` |
 
 A change column takes the format of its row (`$ Change` the amount format, `% Change` the percent format).
+
+**Currency formats.** Write the Amount with $ format with the symbol in Lists K2, the subsidiary's own currency's. A symbol that NetSuite places after the amount takes `_(* #,##0" <s>"_);_(* \(#,##0" <s>"\);_(* "– <s>"_);_(@_)`, where `<s>` is the symbol. For each other symbol in Lists K, once each, add one conditional format over exactly the cells that take the Amount with $ format, as one multi-area range: the formula `=CurrencySymbol="<symbol>"`, and as its number format the Amount with $ format with that symbol. Budget columns stay out of these ranges: a budget has no currency argument, so each budget column takes the symbol of its subsidiary's budget currency from the currency table (`SKILL.md`, *Edge cases*). Add them before the page's other conditional formats: each conditional format added goes to the top, so the rule that blanks the future months, added later, keeps precedence. Inputs C27 takes the same rules with its own format, `"<s>"#,##0` or `#,##0" <s>"`. The headings shown as `$ Change` and `$ Variance` in the tables below are formulas, `=TRIM(CurrencySymbol&" Change")` and `=TRIM(CurrencySymbol&" Variance")`, so they show the reporting currency's symbol. With Lists K empty, the rows that take the Amount with $ format take the Amount format, and the headings read Change and Variance.
 
 ---
 

@@ -27,7 +27,7 @@ All are on the Finsyte ribbon › Templates and Actions › Standard Reports. Ba
 | **Grouped Trial Balance** | The same accounts, with each NetSuite parent account as a header over its sub-accounts and a subtotal |
 | **Comparative Trial Balance**, **Comparative Grouped Trial Balance** | The two above with a second value column, difference, and % |
 
-**Parameters.** Every template has Subsidiary, Fiscal Year, Period, and Period Range cells at the top, plus Book; Budget vs Actual adds Budget Category. Each parameter cell has a Finsyte dropdown. In a Comparative template, each value column has its own parameter cells, so it can compare two years, two periods, or two subsidiaries. Rows for Item, Class, Department, Location, Entity, Transaction Type, Posted, Currency, and each custom segment are added by default, skipping features the NetSuite account doesn't use. The user can turn any of them off in Help › Preferences › Template Parameters, which affects only templates created afterward.
+**Parameters.** Every template has Subsidiary, Fiscal Year, Period, and Period Range cells at the top, plus Book; Budget vs Actual adds Budget Category. Each parameter cell has a Finsyte dropdown. In a Comparative template, the second value column has its own Fiscal Year cell, and its other parameter cells start as references to the first column's; overwrite them to compare two periods or two subsidiaries. Rows for Item, Class, Department, Location, Entity, Transaction Type, Posted, Currency, and each custom segment in Segments Used are added by default; Item, Class, Department and Location are left out for a NetSuite account that doesn't use them. The user can turn any of them off in Help › Preferences › Template Parameters, which affects only templates created afterward. Budget vs Actual has fixed rows, Item to Currency with no Posted row and no custom segments, that Template Parameters doesn't change.
 
 **Period Range.** A balance sheet uses `YTD`. The Cash Flow templates accept only `PTD` and `RTD`, because a cash flow statement has no opening balance.
 
@@ -40,10 +40,10 @@ After the parameters are set, the user runs Finsyte ribbon › Templates and Act
 - **Account rows**, grouped the way the same NetSuite report groups them (see *Layouts*), with sub-accounts under their NetSuite parent.
 - **A value formula per account** that reads the parameter cells in its own column: `=FSN.GLAccountBalance(D$5,D$6,D$7,D$8,$B12,D$9,…)`, with a leading `-` on rows the statement reverses. Parameter references are locked by row and the account reference by column, so a copy of the column one to the right reads the parameter cells above the new column.
 - **Subtotal rows** as `=AGGREGATE(9,0,<first>:<last>)` over each group's block.
-- **Header rows** that show the group's total only while the group is collapsed: `=IF(SUBTOTAL(102,…)=0, AGGREGATE(…), "")`.
+- **Header rows** that show the group's total only while the group is collapsed: `=IF(SUBTOTAL(102,…)=0, AGGREGATE(…), "")`, with Help › Preferences › Tree Options › Enable Account Grouping on, the default.
 - **Name cells** from `FSN.GLAccountName`, with a `"Total - "` prefix on subtotal rows while the group is expanded.
-- **Calculated rows** such as Gross Profit, Net Ordinary Income, Net Income, Net Change in Cash, and Cash at End of Period, as arithmetic on the subtotals.
-- **Excel outline groups** for expanding and collapsing each level, and the Finsyte cell styles: `FS L1` to `FS L4`, their `Total` versions, `FS Posting`, `FS Sum`, and `FS Input`.
+- **Calculated rows** such as Gross Profit, Net Ordinary Income, Net Income, Net Change in Cash, and Cash at End of Period, as arithmetic on the subtotals' `AGGREGATE` expressions, such as `=(AGGREGATE(9,0,D13:D20)-AGGREGATE(9,0,D22:D30))`.
+- **Excel outline groups** for each level past Help › Preferences › Tree Options › Grouping Level (the plain Trial Balances have none), and the Finsyte cell styles: `FS L1` to `FS L4` and their `Total` versions on statements, `FS Posting`, `FS Sum` and `FS Sum Total` on Trial Balances. The parameter cells carry `FS Input`.
 
 **Run it once.** Load Accounts clears and rebuilds the whole generated area each time, so rows, formulas, and formatting added there are lost. Run it when the template is first created and never on an existing report. To change the period or subsidiary, change the parameter cells; to report another subsidiary, copy the sheet. Add the check in *Keep reports complete* (SKILL.md) for accounts created in NetSuite later.
 

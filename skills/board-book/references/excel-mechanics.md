@@ -22,7 +22,7 @@ Run these in order. The first three only read; nothing is written before all of 
 | A workbook for the book | The active workbook has no sheet named Inputs, Cover, Index, Lists or a number, and none of the names in `references/front-pages.md`, "Workbook names" | Ask the user to open a new blank workbook (File › New › Blank workbook) and ask again there. Names and sheets with these names would clash with the book's formulas, and a write would overwrite their sheet. |
 | Calculation mode | `application.calculationMode` | Record it. Under `Manual`, tell the user that the values appear only after F9, and ask them to press F9 when you wait for values. Don't change the setting: it applies to every open workbook. |
 | Dynamic arrays | `Office.context.requirements.isSetSupported("ExcelApi","1.12")`; then, once Lists exists, a test spill `=SEQUENCE(2)` in a discovery cell returns two rows | Stop. The book uses spills, `FILTER`, `TEXTJOIN` and `LET`, which need Microsoft 365. |
-| Finsyte loaded and running | `=FSN.Range.Subsidiaries()` in Lists A2, read after it settles | `#NAME?`: Finsyte isn't loaded. Empty text: Finsyte is signed out, or signed in with its lists not loaded; ask what the Finsyte tab's Connectivity button reads. `Login`: the user signs in. `Switch Company`: the user clicks Refresh Data › Entire Workbook. A paused Finsyte still returns these lists, and its value cells read 0 (SKILL.md, "Verify", step 1). While Finsyte runs, its button in the Refresh group reads Pause Connection, so send the user to Resume Connection only after the user says the button reads Resume Connection. Stop until it returns subsidiaries. |
+| Finsyte loaded and running | `=FSN.Range.Subsidiaries(,,,FALSE)` in Lists A2, read after it settles | `#NAME?`: Finsyte isn't loaded. `Error`: Finsyte isn't connected; ask what the Finsyte tab's Connectivity button reads. `Login`: the user signs in. `Switch Company`: the user clicks Refresh Data › Entire Workbook. One empty cell: Finsyte returned no subsidiaries; the user clicks Refresh Data › Entire Workbook. A paused Finsyte still returns these lists, and its value cells read 0 (SKILL.md, "Verify", step 1). While Finsyte runs, its button in the Refresh group reads Pause Connection, so send the user to Resume Connection only after the user says the button reads Resume Connection. Stop until it returns subsidiaries. |
 
 Tell the user, before the first write, that you add a hidden Lists sheet to read their NetSuite lists, and that everything you add stays in this workbook. Then add Lists and run the last two checks there.
 
@@ -36,7 +36,7 @@ Read NetSuite through Finsyte formulas that you write on the Lists sheet, wait f
 
 ### Before round 1
 
-Write the Lists columns A to F (`references/front-pages.md`, "Lists"). From them:
+Write the Lists columns A to C, E and F (`references/front-pages.md`, "Lists"). From them:
 
 - **Subsidiaries.** A OneWorld account lists its subsidiaries, and a parent with children also as `<name> (Consolidated)`. One entry and no `(Consolidated)` entries: a single company, so no consolidating pages.
 - **Fiscal years** in `ListFiscalYears`, latest first.
@@ -46,17 +46,19 @@ Write the Lists columns A to F (`references/front-pages.md`, "Lists"). From them
 
 With the subsidiary, fiscal year and period on Inputs (C5, C11, C14), write the rest.
 
-**Periods per year.** For `n` from 1 to 14 in the discovery area: `=FSN.GetPeriodName(<n>,CurFY,Subsidiary)`, `=FSN.PeriodToDate(CurFY,<n>,"Start")` and `=FSN.PeriodToDate(CurFY,<n>)`. A period is regular when it has a name and dates and doesn't start on the day the previous period ends. A period named `Adjust …`, or one whose start and end are the previous period's last day, is an adjustment period. The count of regular periods, usually 12, goes in Inputs C34 (`PeriodsPerYear`). When an adjustment period exists, compare `=-FSN.GLAccountBalance(Subsidiary,CurFY,<last regular period>,<"YTD">,<"FSN_L4_NIN">)` with the same call for the adjustment period's number, the period numbers typed and the range and code in heading cells; if they differ, the company posts year-end entries there (interview round 1).
+**Periods per year.** For `n` from 1 to 14 in the discovery area: `=FSN.GetPeriodName(<n>,CurFY,Subsidiary)`, `=FSN.PeriodToDate(CurFY,<n>,"Start")` and `=FSN.PeriodToDate(CurFY,<n>)`. Past the year's last period, `FSN.GetPeriodName` returns `Invalid period number specified` and `FSN.PeriodToDate` returns `Incomplete parameters`: no period. A period is regular when it has a name and dates and doesn't start on the day the previous period ends. A period named `Adjust …`, or one whose start and end are the previous period's last day, is an adjustment period. The count of regular periods, usually 12, goes in Inputs C34 (`PeriodsPerYear`). When an adjustment period exists, compare `=-FSN.GLAccountBalance(Subsidiary,CurFY,<last regular period>,<"YTD">,<"FSN_L4_NIN">)` with the same call for the adjustment period's number, the period numbers typed and the range and code in heading cells; if they differ, the company posts year-end entries there (interview round 1).
 
 **Subsidiary tree.** For each entry of `ListSubsidiaryMembers` (Lists B): `=FSN.GetListInfo("Subsidiaries",<name>,"Id")`, `"Parent"`, `"IsElimination"`, `"FiscalCalendar"`, `"LegalName"`, and `=FSN.CurrencyName(<name>)`. The members of a consolidated subsidiary `X (Consolidated)` are `X` and every subsidiary whose `Parent` chain reaches `X`'s `Id`. Note the elimination subsidiaries, the members whose fiscal calendar differs from the book subsidiary's, and the currencies.
+
+**Currency symbols.** A heading cell holding `SELECT name, displaysymbol, BUILTIN.DF(symbolplacement) AS placement FROM currency WHERE isinactive = 'F'`, and below it `=FSN.Query(<that cell>)`. Finsyte returns the columns in alphabetical order of their names, `displaysymbol`, `name`, `placement`, so read each column by its header. Then write Lists D, the subsidiary's own currency and then the currency of each parent above it in the subsidiary tree, each currency once, and Lists K, the display symbol of each. Note the currencies whose `placement` is not `Before Number`: their symbol follows the amount. A message in place of the table: write D, leave K empty, and say in the plan that the amounts show no currency symbol, with the message. Symbols the user gives in reply go in K.
 
 **Segments.** Lists G to I. A list with one blank cell: the segment is unused for this subsidiary. Read the values, and which are `(Hierarchy)` rollups.
 
 **Chart of accounts.** In the discovery area:
 
-1. One list per account type code, as a spill down: `=FSN.Range.AccountNumbers(<code>,,Subsidiary)` for each of `FSN_L3_BNK`, `FSN_L3_ARE`, `FSN_L3_URE`, `FSN_L3_OCA`, `FSN_L3_DEX`, `FSN_L3_FAS`, `FSN_L3_LTO`, `FSN_L3_APL`, `FSN_L3_CCX`, `FSN_L3_OCL`, `FSN_L3_DRE`, `FSN_L3_LTL`, `FSN_L3_EQU`, `FSN_L3_INC`, `FSN_L3_COG`, `FSN_L3_EXP`, `FSN_L3_OIN`, `FSN_L3_OEX` (with the code typed in a heading cell, not in the formula). An account's type is the list it appears in. These lists include summary accounts, so the tree is complete.
+1. One list per account type code, as a spill down: `=FSN.Range.AccountNumbers(<code>,,Subsidiary)` for each of `FSN_L3_BNK`, `FSN_L3_ARE`, `FSN_L3_URE`, `FSN_L3_OCA`, `FSN_L3_DEX`, `FSN_L3_FAS`, `FSN_L3_LTO`, `FSN_L3_APL`, `FSN_L3_CCX`, `FSN_L3_OCL`, `FSN_L3_DRE`, `FSN_L3_LTL`, `FSN_L3_EQU`, `FSN_L3_INC`, `FSN_L3_COG`, `FSN_L3_EXP`, `FSN_L3_OIN`, `FSN_L3_OEX` (with the code typed in a heading cell, not in the formula). An account's type is the list it appears in. These lists include summary accounts, so the tree is complete for the active accounts the subsidiary can use. Inactive accounts with balances reach the totals through the rollup codes (SKILL.md, "Edge cases").
 2. Once they settle, write each account once, typed as text, down one column, and beside it: `=FSN.GLAccountName(<acct>)` and `=FSN.GetListInfo("GL Accounts",<acct>,<property>)` for `Id`, `Parent`, `IsSummary`, `SpecialAccountType` and `Eliminate`, with the list name and each property in heading cells.
-3. Read them. `Parent` holds the parent's `Id`: build the tree from it. Keep NetSuite's order, the order of the lists.
+3. Read them. `Parent` holds the parent's `Id`, and for a top-level account a negative number, the `Id` of its type's `FSN_` rollup: build the tree from it. Keep the order of the lists, which Finsyte sorts by account number as text.
 
 From the table:
 
@@ -66,7 +68,7 @@ From the table:
 | Undeposited Funds | `SpecialAccountType` `UndepFunds`, or the account named Undeposited Funds |
 | Retained earnings and translation accounts | `SpecialAccountType` `RetEarnings`, `CumulTransAdj` or `CTA-E`: left out of Paid-in capital |
 | Intercompany accounts | Balance sheet accounts only (the asset, liability and equity type lists) with `Eliminate` `T`, or a name with "intercompany", "due from" or "due to". Intercompany revenue, cost of sales and expense accounts stay on the operations lines: on Due from (to) affiliates their year-to-date activity would unbalance the balance sheet. Confirm in round 3. |
-| Intercompany entity names | For each consolidating member, `=FSN.Range.Entities(<"*<member name>*" in a cell>,,Subsidiary,FALSE)`: the customers, vendors and other entities whose names hold the member's name, such as "IC - Canada". These are the candidates for `Affiliates`: the subsidiary names themselves often aren't the entity on intercompany lines, and then every balance lands in Other entities. Confirm in round 3. |
+| Intercompany entity names | For each consolidating member, `=FSN.Range.Entities(<"*<member name>*" in a cell>,,Subsidiary,FALSE,,,FALSE)`: the customers, vendors and other entities whose names hold the member's name, such as "IC - Canada", without the `(Hierarchy)` entries of their parents. These are the candidates for `Affiliates`: the subsidiary names themselves often aren't the entity on intercompany lines, and then every balance lands in Other entities. Confirm in round 3. |
 | Depreciation and amortization | Expense accounts, or a parent, named "depreciation" or "amortization" |
 | Distributions | Equity accounts named "distribution", "dividend" or "drawing" |
 | Prepaid expenses | An Other Current Asset parent named "prepaid" |
@@ -90,7 +92,7 @@ From the table:
 
 **Names.** `context.workbook.names.add("CurFY", inputs.getRange("C11"))`; for a spill, `context.workbook.names.add("ListFiscalYears", "=Lists!$E$2#")`. Check the result: a name that already exists throws.
 
-**Dropdowns.** `range.dataValidation.rule = { list: { inCellDropDown: true, source: "=ListSubsidiaries" } }`, and `range.dataValidation.errorAlert = { showAlert: true, style: "Stop", message: "Choose a value from the list." }`; style `"Warning"` for the column lists. The Period cell: `{ wholeNumber: { formula1: 1, formula2: "=PeriodsPerYear", operator: "Between" } }`.
+**Dropdowns.** `range.dataValidation.rule = { list: { inCellDropDown: true, source: "=ListSubsidiaries" } }`, and `range.dataValidation.errorAlert = { showAlert: true, style: "Stop", message: "Choose a value from the list." }`; style `"Warning"` for the column lists. Every input with a dropdown in `references/front-pages.md` takes a list rule on its list's name, the Period cell included: `source: "=ListPeriods"`.
 
 **Links.** `range.hyperlink = { documentReference: "'1'!A1", textToDisplay: "1" }`. Sheet names that are numbers need the quotes, in links and in formulas: `='1'!$C$1`.
 
@@ -135,4 +137,4 @@ Finsyte fetches values in the background. A cell shows `#GETTING_DATA` (in Offic
 3. When the count stops falling for five minutes, stop waiting: list the pages that still have pending cells, and ask the user to check that Finsyte is running and to use Finsyte › Refresh Data › Current Sheet on them. Never read checks or tie out while cells are pending.
 4. Under Manual calculation, ask the user to press F9 before each read.
 
-A large book can take several minutes on first calculation: Finsyte queries NetSuite for every value cell. Later opens are faster: Finsyte caches closed periods.
+A large book can take several minutes on first calculation: Finsyte queries NetSuite for every value cell. Later opens are faster: Store Values on Open reuses the values saved in the file, and the Summary Cache keeps closed-period balances on the computer once its background build completes.

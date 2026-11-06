@@ -56,8 +56,8 @@ The book is built in Excel for Windows with the Finsyte add-in loaded and signed
 
 1. **Load** `financial-reports`, and read `references/excel-mechanics.md`.
 2. **Check before you start** (`references/excel-mechanics.md`, "Before you start"). Stop at the first failed check and tell the user what to do.
-3. **Discovery, part 1:** the Lists sheet, columns A to F.
-4. **Round 1** of the interview. Write Inputs C5, C11 and C14 and their names, then **discovery, part 2:** periods, the subsidiary tree, segments, the chart of accounts.
+3. **Discovery, part 1:** the Lists sheet, columns A to C, E and F.
+4. **Round 1** of the interview. Write Inputs C5, C11 and C14 and their names, then **discovery, part 2:** periods, the subsidiary tree, the currency symbols (Lists D and K), segments, the chart of accounts. Round 1 ends with the reporting currency, which reads the subsidiary tree.
 5. **Rounds 2 to 4.** Draft the line plan for round 3 from the chart of accounts.
 6. **The build plan.** Wait for a yes.
 7. **Build**, in this order: the rest of Lists; Inputs (with the line plan in its notes); Cover; each report page, in page order; Index; then `BookChecks` on Inputs. Before the first page, set the Normal style's font (`references/excel-mechanics.md`, "Formatting calls"). For each page: frame and titles, parameter block, headings, body rows, checks block, number formats, bold, sizes and colors on the content cells only (the font name comes from the Normal style), outline, the blank-cell clear, conditional formats, page setup, then the used-range check (`references/excel-mechanics.md`, "Formatting calls").
@@ -75,7 +75,7 @@ Then go on in the order of step 7 from the first thing missing: the next page, o
 
 ## Verify
 
-1. **Finsyte returned values.** A paused Finsyte returns 0 in every value cell it holds no cached value for, and 0 less 0 passes every check. Total assets of 0 on page 1, or a page of zeros, stops the verify: ask the user what the button in Finsyte's Refresh group reads. Resume Connection means Finsyte is paused: the user clicks it, then Refresh Data › Entire Workbook, and you wait for values and verify again.
+1. **Finsyte returned values.** A paused Finsyte returns 0 in every value cell it holds no value in memory for, closed periods from the Summary Cache included, and 0 less 0 passes every check. Total assets of 0 on page 1, or a page of zeros, stops the verify: ask the user what the button in Finsyte's Refresh group reads. Resume Connection means Finsyte is paused: the user clicks it, then Refresh Data › Entire Workbook, and you wait for values and verify again.
 2. **Errors.** Search every page for `#VALUE!`, `#NAME?`, `#REF!`, `#SPILL!` and Finsyte messages such as "Invalid account number". Each one is a build mistake or a gotcha in the Finsyte skill: fix its cause.
 3. **Checks.** Read each page's Overall cell and every check row. For each Error, find the row the check points to and decide:
 
@@ -122,6 +122,7 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 - **Change a column's member.** Change the entry on Inputs (H, J, L or N). Adding or removing a column: copy a member column, or delete one, on every page of that group, resize the list's name on Inputs, and update the sum checks.
 - **Add a page or a page group.** Build it from `references/pages.md` with the existing Inputs and line plan, insert it in page order, renumber the sheets after it, and update the Index, its links and `BookChecks`.
 - **Rename a caption.** Type over it on every page of the statement and in the Inputs notes.
+- **Change the reporting currency.** Pick a parent subsidiary's currency from the dropdown in Inputs C8, or put back `=FSN.CurrencyName(Subsidiary)`. The actual amounts, the change headings and C27 take its symbol with no other change; the budget columns keep their budget currency and its symbol (*Edge cases*). A child's or a sibling's currency gets no change: NetSuite has no exchange rates into it from this subsidiary (*Edge cases*). A new subsidiary in Inputs C5 needs Lists D and K and the currency formats written again from its subsidiary tree (`references/excel-mechanics.md`, "Currency symbols").
 
 ## Edge cases
 
@@ -131,7 +132,7 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 | Elimination subsidiary | The last consolidating column. Left out of page 24 and of Affiliates. |
 | An inactive subsidiary | Not in `ListSubsidiaryMembers`, so never a column. When the user names one, look for it in `=FSN.Range.Subsidiaries(,,,TRUE,FALSE)`: if it's there, say it is inactive, not missing. Its balances can still count in the `(Consolidated)` column; then the sum check reads Review. |
 | A member with another fiscal calendar | Left out of the consolidating columns by default (round 2): its period numbers fall on other months. The sum check then reads Review, and the report says why. |
-| More than one currency | Every value column passes `ReportCurrency`, which follows the subsidiary's own currency until the user picks another (`references/front-pages.md`, Inputs row 8). Budgets have no currency argument, so the budget columns stay in the subsidiary's currency. The reply to a pick of another currency says so, and so does the plan for page 24, where budgets of different currencies meet. |
+| More than one currency | Every value column passes `ReportCurrency`, which follows the subsidiary's own currency until the user picks a parent subsidiary's currency (`references/front-pages.md`, Inputs row 8). Inputs C8 offers only these currencies (Lists D), and the actual amounts show the symbol of the currency in C8 (`references/pages.md`, "Number formats"). NetSuite's consolidated exchange rates run from a subsidiary to its parents only: a child's or a sibling's currency returns `Invalid Currency`, or `Error` on older Finsyte versions, so decline it, say why, and change nothing. Budgets have no currency argument, so a budget column stays in the currency `FSN.CurrencyName(<subsidiary>,<budget category>)` returns: the subsidiary's own for a local budget category, the top parent subsidiary's for a global one. Read it for the book's subsidiary and each page 24 member, both arguments in cells. The plan and the reply to a currency pick name the budget currency where it differs from the reporting currency, and the plan for page 24 says where budgets of different currencies meet. |
 | A segment unused, or no budget categories | Leave out its pages. |
 | Departments, classes or locations | A single member doesn't balance on its own, so on the segment pages the translation adjustment and the exchange rate lines carry what isn't assigned to a segment, and their captions say so. |
 | Intercompany accounts | Balance sheet accounts only. Intercompany revenue, cost and expense stay on the operations lines. |
@@ -143,6 +144,7 @@ Read the pages before you change them: the line plan is on Inputs (E3 down) and 
 | Period 1 | The prior month and prior quarter-end columns read the prior fiscal year's last period. Inputs handles it. |
 | 13 periods, or an adjustment period | `PeriodsPerYear` counts regular periods. For 13 periods, type the quarter cells (`references/front-pages.md`). For adjustment entries, see round 1. |
 | A fiscal year that isn't the calendar year, or not named `FY yyyy` | Month headings come from `FSN.PeriodToDate`, earlier fiscal years from the fiscal year list, and the headings that name a fiscal year use its NetSuite name, so all of them follow NetSuite. |
+| A subsidiary on another fiscal calendar than the top-level subsidiary | `FSN.PeriodToDate` reads the top-level subsidiary's calendar, so the Cover dates and the month headings follow that calendar. Say so in the plan. |
 | Accounts without numbers, or with `-`, `^`, `*` or `?` in the number | Use `id_<internal id>` in B. |
 | Account numbers with leading zeros | Column B is text, set before the values are written. |
 | Summary accounts | Never detail rows: their posting children are. A posting parent is a detail row of its own. |
